@@ -5,12 +5,27 @@ from typing import List
 
 from ..data.models import Service, Record
 
-from ..settings import Settings
+from ..settings import settings
 
-prometheus_url = Settings().get("PROMETHEUS_URL")
+prometheus_url = settings.get("PROMETHEUS_URL")
 
 
-def get_ping_times():
+def get_ping_times(mode: str = "prometheus") -> dict[str, float]:
+    if mode == "manual":
+        return _get_ping_times_manual()
+    elif mode == "prometheus":
+        return _get_ping_times_prometheus()
+    else:
+        raise ValueError(f"Unknown ping mode: {mode}")
+
+
+def _get_ping_times_manual():
+    # TODO: implement manual ping (using Selenium)
+
+    return {}
+
+
+def _get_ping_times_prometheus():
     response = requests.get(
         prometheus_url + "/api/v1/query?query=probe_duration_seconds"
     )

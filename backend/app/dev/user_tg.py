@@ -1,5 +1,5 @@
 from ..data.db import get_session
-from ..data.models import User, TelegrgamAccount
+from ..data.models import User, TelegramAccount
 
 
 def main() -> None:
@@ -10,7 +10,7 @@ def main() -> None:
         )
 
         new_user.telegram_accounts.append(
-            TelegrgamAccount(
+            TelegramAccount(
                 token="asdfghjkl",
             )
         )

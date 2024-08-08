@@ -13,7 +13,7 @@ from aiogram.client.default import DefaultBotProperties
 from typing import List
 from sqlmodel import select
 
-from ..data.models import Incident, User, TelegrgamAccount
+from ..data.models import Incident, User, TelegramAccount
 from ..data.db import get_session
 
 from ..settings import Settings
@@ -48,8 +48,8 @@ async def login_handler(message: Message, command: CommandObject) -> None:
         return
 
     with get_session() as sess:
-        query = select(TelegrgamAccount).where(
-            TelegrgamAccount.account_id == message.from_user.id
+        query = select(TelegramAccount).where(
+            TelegramAccount.account_id == message.from_user.id
         )
         tgacc = sess.exec(query).one_or_none()
 
@@ -59,7 +59,7 @@ async def login_handler(message: Message, command: CommandObject) -> None:
             )
             return
 
-        query = select(TelegrgamAccount).where(TelegrgamAccount.token == login_code)
+        query = select(TelegramAccount).where(TelegramAccount.token == login_code)
         tgacc = sess.exec(query).one_or_none()
 
         if tgacc.account_id:
@@ -71,6 +71,22 @@ async def login_handler(message: Message, command: CommandObject) -> None:
             await message.answer(f"Logged in as {hbold(tgacc.user.username)}.")
         else:
             await message.answer("Could not log in. Is your code valid?")
+
+
+@dp.message(Command("me"))
+async def me_handler(message: Message) -> None:
+    with get_session() as sess:
+        query = select(TelegramAccount).where(
+            TelegramAccount.account_id == message.from_user.id
+        )
+        tgacc = sess.exec(query).one_or_none()
+
+        if tgacc:
+            await message.answer(
+                f"You are currently logged in as {hbold(tgacc.user.username)}"
+            )
+        else:
+            await message.answer("You are not currently logged in")
 
 
 async def report_incident_cor(incident: Incident, users: List[User]):

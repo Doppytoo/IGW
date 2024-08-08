@@ -57,15 +57,16 @@ class Incident(SQLModel, table=True):
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    username: str
-    password: str
+    username: str = Field(unique=True)
+    password: str = Field(exclude=True)
+    is_admin: bool = Field(default=False)
 
-    telegram_accounts: List["TelegrgamAccount"] = Relationship(back_populates="user")
+    telegram_accounts: List["TelegramAccount"] = Relationship(back_populates="user")
 
 
-class TelegrgamAccount(SQLModel, table=True):
+class TelegramAccount(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    token: str
+    token: str = Field(unique=True, exclude=True)
     account_id: Optional[int] = Field(unique=True, nullable=True)
 
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")

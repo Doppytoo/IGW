@@ -9,6 +9,8 @@ from .incidents import process_incidents
 from ..data.db import get_session
 from ..data.models import User
 
+from ..settings import Settings
+
 from ..bot.main import report_incidents
 
 
@@ -29,7 +31,8 @@ def main_loop():  # * Call this with threading.Thread(target=main_loop, daemon=t
                 print(inc.model_dump_json())
             report_incidents(incidents, users)
 
-        next_call += 10 * 60
+        delay = Settings().get("ping_delay")
+        next_call += delay * 60
         time.sleep(next_call - time.time())
 
 

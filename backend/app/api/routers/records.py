@@ -1,13 +1,21 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from datetime import datetime
 
 from ...data.models import Record
 from ...data.db import get_session
 
+from ..auth import auth
+
 router = APIRouter(
     prefix="/records",
     tags=["records"],
+    dependencies=[Depends(auth)],
+    responses={
+        401: {"description": "Unauthorized"},
+        403: {"description": "Forbidden"},
+        404: {"description": "Not found"},
+    },
 )
 
 
