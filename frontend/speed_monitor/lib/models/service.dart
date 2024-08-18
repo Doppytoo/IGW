@@ -10,4 +10,11 @@ class Service {
     required this.name,
     required this.pingThreshold,
   });
+
+  factory Service.fromJson(Map<String, dynamic> json) => Service(
+        id: json['id'],
+        url: json['url'],
+        name: json['name'],
+        pingThreshold: json['ping_threshold'],
+      );
 }
