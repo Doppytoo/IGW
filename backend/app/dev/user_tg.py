@@ -6,7 +6,7 @@ def main() -> None:
     with get_session() as sess:
         new_user = User(
             username="Artem",
-            password="12345678",
+            hashed_password="12345678",
         )
 
         new_user.telegram_accounts.append(

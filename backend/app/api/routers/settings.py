@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
+from typing import Annotated, Any
 
 from ...settings import settings
 
@@ -30,7 +31,7 @@ def get_setting(key: str):
 
 
 @router.post("/{key}")
-def set_setting(key: str, value):
+def set_setting(key: str, value: Annotated[Any, Body()]):
     try:
         value = int(value)
     except ValueError:

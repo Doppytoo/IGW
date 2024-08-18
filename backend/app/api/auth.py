@@ -15,7 +15,7 @@ from ..data.models import User
 
 from ..settings import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 jwt_secret = settings.get("JWT_SECRET")
 expire_delta = timedelta(minutes=settings.get("JWT_EXPIRES"))
@@ -70,7 +70,7 @@ def create_user(username: str, password: str, is_admin: bool) -> User | None:
         try:
             new_user = User(
                 username=username,
-                password=hash_password(password),
+                hashed_password=hash_password(password),
                 is_admin=is_admin,
             )
 

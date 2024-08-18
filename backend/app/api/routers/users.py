@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, Form
+from fastapi import APIRouter, HTTPException, Depends, Body
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlmodel import select
 from datetime import datetime
 from typing import Annotated
+import re
 
 from ...data.models import User
 from ...data.db import get_session
@@ -30,12 +31,23 @@ async def me(user: User = Depends(auth)):
 
 @router.post("/new", dependencies=[Depends(auth_admin)])
 async def create_new_user(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
-    is_admin: Annotated[bool | None, Form()],
+    username: Annotated[str, Body()],
+    password: Annotated[str, Body()],
+    is_admin: Annotated[bool | None, Body()] = False,
 ):
     if is_admin is None:
         is_admin = False
+
+    if (
+        re.fullmatch(
+            r"(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[?!@$%^&*#-])[A-Za-z0-9?!@$%^&*#-]{8,}",
+            password,
+        )
+        is None
+    ):
+        raise HTTPException(status_code=400, detail="Password is too weak")
+    if re.fullmatch(r"\w{3,20}", username) is None:
+        raise HTTPException(status_code=400, detail="Username is invalid")
 
     user = create_user(username, password, is_admin)
 
@@ -59,9 +71,9 @@ async def get_user(id: int):
 @router.patch("/{id}", dependencies=[Depends(auth_admin)])
 async def update_user(
     id: int,
-    username: Annotated[str | None, Form()],
-    password: Annotated[str | None, Form()],
-    is_admin: Annotated[bool | None, Form()],
+    username: Annotated[str | None, Body()] = None,
+    password: Annotated[str | None, Body()] = None,
+    is_admin: Annotated[bool | None, Body()] = None,
 ):
     with get_session() as sess:
         user = sess.get(User, id)
@@ -69,11 +81,11 @@ async def update_user(
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if username:
+        if username is not None:
             user.username = username
-        if password:
-            user.password = hash_password(password)
-        if not (is_admin is None):
+        if password is not None:
+            user.hashed_password = hash_password(password)
+        if is_admin is not None:
             user.is_admin = user.is_admin
 
         sess.add(user)

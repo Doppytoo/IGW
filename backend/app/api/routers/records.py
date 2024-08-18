@@ -39,17 +39,18 @@ def get_record(record_id: int) -> Record:
 def get_records(
     page: int = 0,
     lim: int = 100,
-    service_id: int = None,
-    period_start: datetime = None,
-    period_end: datetime = None,
+    # ascending: bool = False,
+    service_id: int | None = None,
+    period_start: datetime | None = None,
+    period_end: datetime | None = None,
 ) -> list[Record]:
     with get_session() as sess:
         query = select(Record).order_by(Record.id.desc())
-        if service_id:
+        if service_id is not None:
             query = query.where(Record.service_id == service_id)
-        if period_start:
+        if period_start is not None:
             query = query.where(Record.time_recorded_at >= period_start)
-        if period_end:
+        if period_end is not None:
             query = query.where(Record.time_recorded_at <= period_end)
 
         records = sess.exec(query.offset(page * lim).limit(lim)).all()
