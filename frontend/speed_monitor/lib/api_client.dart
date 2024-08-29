@@ -7,7 +7,7 @@ import 'package:speed_monitor/models/user.dart';
 
 class SpeedMonitorApiClient {
   static final _defaultOptions = BaseOptions(
-    baseUrl: '127.0.0.1:8000',
+    baseUrl: 'http://127.0.0.1:8000',
   );
 
   final Dio _httpClient;
@@ -33,53 +33,70 @@ class SpeedMonitorApiClient {
     return response.data['token'] as String;
   }
 
+  // * Incidents
   Future<List<Incident>> getIncidients({
-    int page = 0,
+    int skip = 0,
     int lim = 100,
     int? serviceId,
     DateTime? start,
     DateTime? end,
   }) async {
     final resp = await _httpClient.get('/incidents', queryParameters: {
-      'page': page,
+      'skip': skip,
       'lim': lim,
       if (serviceId != null) 'service_id': serviceId,
       if (start != null) 'period_start': start.toIso8601String(),
       if (end != null) 'period_end': end.toIso8601String(),
     });
 
-    return (resp.data as List<Map<String, dynamic>>)
-        .map((incidentJson) => Incident.fromJson(incidentJson))
+    return (resp.data as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(Incident.fromJson)
         .toList();
   }
 
+  // * Records
   Future<List<SpeedRecord>> getRecords({
-    int page = 0,
+    int skip = 0,
     int lim = 100,
     int? serviceId,
     DateTime? start,
     DateTime? end,
   }) async {
     final resp = await _httpClient.get('/records', queryParameters: {
-      'page': page,
+      'skip': skip,
       'lim': lim,
       if (serviceId != null) 'service_id': serviceId,
       if (start != null) 'period_start': start.toIso8601String(),
       if (end != null) 'period_end': end.toIso8601String(),
     });
 
-    final records = (resp.data as List<Map<String, dynamic>>)
-        .map((recordJson) => SpeedRecord.fromJson(recordJson))
+    final records = (resp.data as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(SpeedRecord.fromJson)
         .toList();
 
     return records;
   }
 
+  Future<List<SpeedRecord>> getLatestRecords() async {
+    final resp = await _httpClient.get('/records/latest');
+
+    final records = (resp.data as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(SpeedRecord.fromJson)
+        .toList();
+
+    return records;
+  }
+
+  // * Services
   Future<List<Service>> getServices() async {
     final resp = await _httpClient.get('/services/all');
 
-    return (resp.data as List<Map<String, dynamic>>)
-        .map((serviceJson) => Service.fromJson(serviceJson))
+    return (resp.data as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map<Service>(Service.fromJson)
         .toList();
   }
 
@@ -88,4 +105,34 @@ class SpeedMonitorApiClient {
 
     return Service.fromJson(resp.data);
   }
+
+  // * Users
+  Future<User> getCurrentUser() async {
+    final resp = await _httpClient.get('/users/me');
+
+    return User.fromJson(resp.data);
+  }
+
+  Future<User> getUser(int id) async {
+    final resp = await _httpClient.get('/users/$id');
+
+    return User.fromJson(resp.data);
+  }
+
+  // * Settings
+  // Future<Map<String, Object>> getAllSettings() async {
+  //   final resp = await _httpClient.get('/settings/all');
+
+  //   return resp.data;
+  // }
+
+  // Future<Object> getSetting(String key) async {
+  //   final resp = await _httpClient.get('/settings/$key');
+
+  //   return resp.data;
+  // }
+
+  // Future<void> setSetting(String key, Object value) async {
+  //   final resp = await _httpClient.post('/settings/$key');
+  // }
 }

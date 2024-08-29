@@ -30,16 +30,34 @@ class StatusCard extends StatelessWidget {
         bgColor = Theme.of(context).colorScheme.error;
         icon = Icons.gpp_bad;
         break;
-      default:
     }
 
-    final String title =
-        (status == Status.good) ? "Всё хорошо" : "Есть проблемы";
-    final String subtitle = (status == Status.good)
-        ? "Все сервисы загружаются достаточно быстро."
-        : (errorCount == null)
-            ? "Несколько сервисов загружаются слишком медленно."
-            : "$errorCount сервис${(errorCount! % 10 == 1) ? '' : (2 <= errorCount! % 10 && errorCount! % 10 <= 4) ? 'а' : 'ов'} загружа${errorCount! % 10 == 1 ? 'ется' : 'ются'} слишком медленно.";
+    late final String title, subtitle;
+    if (status == Status.good) {
+      title = "Всё хорошо";
+      subtitle = "Все сервисы загружаются достаточно быстро.";
+    } else if (errorCount == null) {
+      title = "Есть проблемы";
+      subtitle = "Несколько сервисов загружаются слишком медленно.";
+    } else {
+      title = "Есть проблемы";
+
+      final String nounEnding = (11 <= errorCount! && errorCount! <= 19)
+          ? 'ов'
+          : (errorCount! % 10 == 1)
+              ? ''
+              : (2 <= errorCount! % 10 && errorCount! % 10 <= 4)
+                  ? 'а'
+                  : 'ов';
+      final String verbEnding = (11 <= errorCount! && errorCount! <= 19)
+          ? 'ются'
+          : errorCount! % 10 == 1
+              ? 'ется'
+              : 'ются';
+
+      subtitle =
+          "$errorCount сервис$nounEnding загружа$verbEnding слишком медленно.";
+    }
 
     return Card.filled(
       // margin: const EdgeInsets.symmetric(

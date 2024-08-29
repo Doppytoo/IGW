@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:speed_monitor/models/service.dart';
 
 import 'package:speed_monitor/pages/home_page.dart';
 import 'package:speed_monitor/pages/incidents_page.dart';
 import 'package:speed_monitor/pages/settings_page.dart';
+import 'package:speed_monitor/screens/service_details_screen.dart';
 
 import 'package:speed_monitor/test_page.dart';
 
 void main() async {
   await initializeDateFormatting('ru_RU', null);
 
-  runApp(const MainApp());
+  runApp(ProviderScope(child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
@@ -24,21 +26,15 @@ class MainApp extends StatelessWidget {
         settings.name == '/serviceDetails' &&
         settings.arguments is Service) {
       return MaterialPageRoute(
-        builder: (ctx) => Scaffold(
-          appBar: AppBar(
-            title: Text((settings.arguments as Service).name),
-          ),
-          body: Placeholder(),
-        ),
+        builder: (ctx) => ServiceDetailsScreen(settings.arguments as Service),
       );
     }
 
-    return null;
+    rdturn null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Global state here
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -76,9 +72,9 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const <Widget>[
           Text('Главная страница'),
-          Text('Инциденты'),
+          Text('Инциденты'),
           Text('Настройки'),
-          // Text('TEST'),
+          Text('TEST'),
         ][_pageIdx],
       ),
       bottomNavigationBar: NavigationBar(
@@ -90,14 +86,14 @@ class _MainScreenState extends State<MainScreen> {
           NavigationDestination(icon: Icon(Icons.home), label: 'Главная'),
           NavigationDestination(icon: Icon(Icons.warning), label: 'Инциденты'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Настройки'),
-          // NavigationDestination(icon: Icon(Icons.track_changes), label: 'TEST'),
+          NavigationDestination(icon: Icon(Icons.track_changes), label: 'TEST'),
         ],
       ),
       body: const <Widget>[
         HomePage(),
         IncidentsPage(),
         SettingsPage(),
-        // TestPage(),
+        TestPage(),
       ][_pageIdx],
     );
   }

@@ -42,7 +42,7 @@ class IncidentTile extends StatelessWidget {
     return Card.outlined(
       child: ListTile(
         isThreeLine: false,
-        title: Text(incident.service.name),
+        title: Text(incident.service!.name),
         subtitle: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -65,7 +65,7 @@ class IncidentTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: Text(
-                '${incident.pingTimeAtStart}с${incident.hasEnded ? ' - ${incident.pingTimeAtEnd!}с' : ''}',
+                '${incident.pingTimeAtStart.toStringAsFixed(2)}с${incident.hasEnded ? ' - ${incident.pingTimeAtEnd!.toStringAsFixed(2)}с' : ''}',
                 // style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),

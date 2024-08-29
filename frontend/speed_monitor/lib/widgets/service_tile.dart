@@ -46,7 +46,8 @@ class ServiceTile extends StatelessWidget {
       // tileColor: bgColor,
       leading: Icon(statusIcon),
       title: Text(service.name),
-      subtitle: Text('$pingTimeс/${service.pingThreshold}с'),
+      subtitle:
+          Text('${pingTime.toStringAsFixed(2)}с/${service.pingThreshold}с'),
       // subtitle: Text(service.url),
       // trailing: Text('0.3с/${service.pingThreshold}с'),
       trailing: const Icon(Icons.arrow_forward_ios),
