@@ -37,7 +37,7 @@ def get_incident(incident_id: int) -> Incident:
 
 @router.get("/")
 def get_incidents(
-    page: int = 0,
+    skip: int = 0,
     lim: int = 100,
     service_id: int = None,
     period_start: datetime = None,
@@ -55,7 +55,7 @@ def get_incidents(
         if has_ended is not None:
             query = query.where(Incident.has_ended == has_ended)
 
-        incidents = sess.exec(query.offset(page * lim).limit(lim)).all()
+        incidents = sess.exec(query.offset(skip).limit(lim)).all()
 
         if len(incidents) == 0:
             raise HTTPException(

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, HTTPException
 from typing import Annotated, Any
 
 from ...settings import settings
@@ -27,7 +27,10 @@ def get_all_settings():
 
 @router.get("/{key}")
 def get_setting(key: str):
-    return settings.get(key)
+    try:
+        return settings.get(key)
+    except KeyError:
+        raise HTTPException(status_code=404)
 
 
 @router.post("/{key}")

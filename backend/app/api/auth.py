@@ -92,8 +92,6 @@ def auth(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
 def auth_admin(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
     user = decode_token(token)
 
-    print(user)
-
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Not admin")
 

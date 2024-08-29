@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from datetime import datetime
 
-from ...data.models import Record
+from ...data.models import Record, Service
 from ...data.db import get_session
 
 from ..auth import auth
@@ -27,6 +27,21 @@ def get_all_records() -> list[Record]:
         return records
 
 
+@router.get("/latest")
+def get_latest_records() -> list[Record]:
+    with get_session() as sess:
+        latest_time = max(set(sess.exec(select(Record.time_recorded_at)).all()))
+
+        query = (
+            select(Record)
+            .where(Record.time_recorded_at == latest_time)
+            .order_by(Record.service_id)
+        )
+        records = sess.exec(query).all()
+
+        return records
+
+
 @router.get("/{record_id}")
 def get_record(record_id: int) -> Record:
     with get_session() as sess:
@@ -37,7 +52,7 @@ def get_record(record_id: int) -> Record:
 
 @router.get("/")
 def get_records(
-    page: int = 0,
+    skip: int = 0,
     lim: int = 100,
     # ascending: bool = False,
     service_id: int | None = None,
@@ -53,7 +68,7 @@ def get_records(
         if period_end is not None:
             query = query.where(Record.time_recorded_at <= period_end)
 
-        records = sess.exec(query.offset(page * lim).limit(lim)).all()
+        records = sess.exec(query.offset(skip).limit(lim)).all()
 
         if len(records) == 0:
             raise HTTPException(
