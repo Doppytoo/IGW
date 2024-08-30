@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:speed_monitor/models/incident.dart';
 import 'package:speed_monitor/models/service.dart';
 import 'package:speed_monitor/providers/data.dart';
+import 'package:speed_monitor/widgets/connection_error.dart';
 import 'package:speed_monitor/widgets/incident_tile.dart';
 
 class IncidentsPage extends ConsumerStatefulWidget {
@@ -14,7 +16,24 @@ class IncidentsPage extends ConsumerStatefulWidget {
 }
 
 class _IncidentsPageState extends ConsumerState<IncidentsPage> {
-  bool _do = true;
+  int? _serviceId;
+  DateTime? _periodStart;
+  DateTime? _periodEnd;
+
+  Widget _filterSheetBuilder(BuildContext ctx) {
+    return Container(
+      height: 480,
+      child: DateRangePickerDialog(
+        firstDate: DateTime(1970, 1, 1, 0, 0),
+        lastDate: DateTime(2070, 1, 1, 0, 0),
+        initialEntryMode: DatePickerEntryMode.calendarOnly,
+      ),
+    );
+  }
+
+  void _openFilterModal() {
+    showModalBottomSheet(context: context, builder: _filterSheetBuilder);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +59,30 @@ class _IncidentsPageState extends ConsumerState<IncidentsPage> {
       },
       child: incidentsAsync.when(
         skipLoadingOnReload: true,
-        error: (error, st) {
-          return Center(
-            child: Text(error.toString() + '\n' + st.toString()),
-          );
+        error: (e, s) {
+          if (e is DioException) {
+            if (e.type == DioExceptionType.connectionError) {
+              return Center(child: ConnectionErrorCard(e));
+            }
+          }
+
+          if (e is StateError) {
+            if (e.toString().contains('requireValue')) {
+              return const Center(child: CircularProgressIndicator.adaptive());
+            }
+          }
+
+          return Text(e.toString());
         },
         loading: () =>
             const Center(child: CircularProgressIndicator.adaptive()),
         data: (incidents) => ListView.builder(
-          itemCount: incidents.length + 1,
+          itemCount: incidents.length + 2,
           itemBuilder: (ctx, idx) {
+            if (idx-- == 0) {
+              return OutlinedButton.icon(
+                  onPressed: _openFilterModal, label: Icon(Icons.filter_list));
+            }
             if (idx == incidents.length) {
               return (incidentsAsync.isLoading) // On reload
                   ? SizedBox(height: 4, child: LinearProgressIndicator())

@@ -30,7 +30,7 @@ class MainApp extends StatelessWidget {
       );
     }
 
-    rdturn null;
+    return null;
   }
 
   @override
@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const <Widget>[
           Text('Главная страница'),
-          Text('Инциденты'),
+          Text('Инциденты'),
           Text('Настройки'),
           Text('TEST'),
         ][_pageIdx],
