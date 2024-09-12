@@ -43,7 +43,31 @@ class UsersSettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                                title: const Text('Удалить пользователя?'),
+                                content: const Text(
+                                    'Пользователь будет удалён навсегда.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(),
+                                    child: const Text('Нет'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      await ref
+                                          .read(usersProvider.notifier)
+                                          .deleteUser(users[idx].id);
+
+                                      if (ctx.mounted) Navigator.of(ctx).pop();
+                                    },
+                                    child: const Text('Да'),
+                                  ),
+                                ],
+                              ));
+                    },
                     icon: const Icon(Icons.delete),
                     color: Theme.of(ctx).colorScheme.error,
                   ),

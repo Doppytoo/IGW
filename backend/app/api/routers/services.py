@@ -91,6 +91,8 @@ def delete_service(service_id: int):
         sess.delete(svc)
         sess.commit()
 
+    return "ok"
+
 
 @router.get("/{service_id}/ping")
 def ping_service(service_id: int) -> Record:

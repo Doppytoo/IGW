@@ -236,14 +236,14 @@ class Users extends _$Users {
     });
   }
 
-  // Future<void> deleteService(int id) async {
-  //   state = await AsyncValue.guard(() async {
-  //     final services = await future;
+  Future<void> deleteUser(int id) async {
+    state = await AsyncValue.guard(() async {
+      final services = await future;
 
-  //     await ref.read(apiProvider).deleteService(id);
-  //     services.removeWhere((svc) => svc.id == id);
+      await ref.read(apiProvider).deleteUser(id);
+      services.removeWhere((usr) => usr.id == id);
 
-  //     return services;
-  //   });
-  // }
+      return services;
+    });
+  }
 }

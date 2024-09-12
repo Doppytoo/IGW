@@ -97,14 +97,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const <Widget>[
-      //     Text('Главная страница'),
-      //     Text('Инциденты'),
-      //     Text('Настройки'),
-      //     Text('TEST'),
-      //   ][_pageIdx],
-      // ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _pageIdx,
         onDestinationSelected: (idx) => setState(() {

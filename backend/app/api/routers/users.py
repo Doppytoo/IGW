@@ -103,3 +103,17 @@ async def update_user(
 
         sess.refresh(user)
         return user
+
+
+@router.delete("/{id}", dependencies=[Depends(auth_admin)])
+async def delete_user(id: int):
+    with get_session() as sess:
+        user = sess.get(User, id)
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        sess.delete(user)
+        sess.commit()
+
+    return "ok"

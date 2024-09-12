@@ -172,6 +172,10 @@ class SpeedMonitorApiClient {
     return User.fromJson(resp.data);
   }
 
+  Future<void> deleteUser(int id) async {
+    await _httpClient.delete('/users/$id');
+  }
+
   // * Settings
   Future<Map<String, Object?>> getAllSettings() async {
     final resp = await _httpClient.get('/settings/all');
