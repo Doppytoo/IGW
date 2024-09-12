@@ -16,14 +16,13 @@ class SpeedRecord {
     this.service,
   });
 
-  factory SpeedRecord.fromJson(Map<String, dynamic> json) {
-    return SpeedRecord(
-      id: json['id'],
-      timeRecordedAt: DateTime.parse(json['time_recorded_at']),
-      pingTime: json['ping_time'],
-      serviceId: json['service_id'],
-    );
-  }
+  SpeedRecord.fromJson(Map<String, dynamic> json)
+      : this(
+          id: json['id'],
+          timeRecordedAt: DateTime.parse(json['time_recorded_at']),
+          pingTime: json['ping_time'],
+          serviceId: json['service_id'],
+        );
 
   SpeedRecord copyWith({
     int? id,

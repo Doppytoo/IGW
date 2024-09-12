@@ -7,8 +7,7 @@ import 'package:speed_monitor/models/user.dart';
 
 class SpeedMonitorApiClient {
   static final _defaultOptions = BaseOptions(
-    baseUrl: 'http://127.0.0.1:8000',
-  );
+      baseUrl: 'http://127.0.0.1:8000', contentType: 'application/json');
 
   final Dio _httpClient;
 
@@ -18,6 +17,8 @@ class SpeedMonitorApiClient {
       : _httpClient = Dio(_defaultOptions.copyWith()
           ..headers['Authorization'] = 'Bearer $authToken');
 
+  bool get hasToken => _httpClient.options.headers['Authorization'] != null;
+
   Future<bool> ping() async {
     final resp = await _httpClient.get('/ping');
 
@@ -26,11 +27,11 @@ class SpeedMonitorApiClient {
 
   Future<String> login(LoginDetails data) async {
     final response = await _httpClient.post(
-      '/token',
+      '/auth/login',
       data: FormData.fromMap(data.toJson()),
     );
 
-    return response.data['token'] as String;
+    return response.data['access_token'] as String;
   }
 
   // * Incidents
@@ -100,13 +101,42 @@ class SpeedMonitorApiClient {
         .toList();
   }
 
-  Future<Service> addService(Map<String, dynamic> serviceJson) async {
-    final resp = await _httpClient.post('/services/new', data: serviceJson);
+  Future<Service> getService(int id) async {
+    final resp = await _httpClient.get('/services/$id');
 
     return Service.fromJson(resp.data);
   }
 
+  Future<Service> addService(Service service) async {
+    final resp =
+        await _httpClient.post('/services/new', data: service.toJson());
+
+    return Service.fromJson(resp.data);
+  }
+
+  Future<Service> updateService(Service service) async {
+    final resp = await _httpClient.patch('/services/${service.id}',
+        data: service.toJson());
+
+    return Service.fromJson(resp.data);
+  }
+
+  Future<void> deleteService(int id) async {
+    await _httpClient.delete('/services/$id');
+  }
+
+  // Future<Service> updateService()
+
   // * Users
+  Future<List<User>> getAllUsers() async {
+    final resp = await _httpClient.get('/users/all');
+
+    return (resp.data as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(User.fromJson)
+        .toList();
+  }
+
   Future<User> getCurrentUser() async {
     final resp = await _httpClient.get('/users/me');
 
@@ -119,20 +149,45 @@ class SpeedMonitorApiClient {
     return User.fromJson(resp.data);
   }
 
+  Future<User> updateUser({required User user, String? password}) async {
+    final requestData = {
+      ...user.toJson(),
+      if (password != null) 'password': password,
+    };
+
+    final resp =
+        await _httpClient.patch('/users/${user.id}', data: requestData);
+
+    return User.fromJson(resp.data);
+  }
+
+  Future<User> addUser({required User user, required String password}) async {
+    final requestData = {
+      ...user.toJson(),
+      'password': password,
+    };
+
+    final resp = await _httpClient.post('/users/new', data: requestData);
+
+    return User.fromJson(resp.data);
+  }
+
   // * Settings
-  // Future<Map<String, Object>> getAllSettings() async {
-  //   final resp = await _httpClient.get('/settings/all');
+  Future<Map<String, Object?>> getAllSettings() async {
+    final resp = await _httpClient.get('/settings/all');
 
-  //   return resp.data;
-  // }
+    return resp.data;
+  }
 
-  // Future<Object> getSetting(String key) async {
-  //   final resp = await _httpClient.get('/settings/$key');
+  Future<Object> getSetting(String key) async {
+    final resp = await _httpClient.get('/settings/$key');
 
-  //   return resp.data;
-  // }
+    return resp.data;
+  }
 
-  // Future<void> setSetting(String key, Object value) async {
-  //   final resp = await _httpClient.post('/settings/$key');
-  // }
+  Future<void> setSetting(String key, Object value) async {
+    final resp = await _httpClient.post('/settings/$key', data: value);
+
+    // return resp.data;
+  }
 }

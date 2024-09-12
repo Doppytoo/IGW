@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/incident.dart';
+import '../../../models/incident.dart';
 
 class IncidentTile extends StatelessWidget {
   IncidentTile(this.incident, {super.key});

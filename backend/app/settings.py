@@ -24,6 +24,16 @@ _DEFAULTS = {
         "description": "Urgent ping interval in minutes",
         "private": False,
     },
+    "repeat_incident_notifications": {
+        "value": True,
+        "description": "Whether to repeat incident messages after a set time",
+        "private": False,
+    },
+    "incident_notification_repeat_delay": {
+        "value": 60,
+        "description": "Delay before repeating incident message in minutes",
+        "private": False,
+    },
 }
 BASE_DIR = str(Path(__file__).resolve().parent).replace("\\", "/")
 

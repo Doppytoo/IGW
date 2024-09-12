@@ -1,18 +1,43 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:speed_monitor/models/incident.dart';
-import 'package:speed_monitor/models/service.dart';
+import 'package:speed_monitor/providers/api.dart';
 import 'package:speed_monitor/providers/data.dart';
 
-class TestPage extends ConsumerStatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class TestPage extends ConsumerWidget {
   const TestPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _TestPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final token = ref.watch(authTokenProvider);
+    final user = ref.watch(userInfoProvider);
+
+    return Scaffold(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(token ?? 'TOKEN NULL'),
+          user.when(
+            error: (e, st) => Text(e.toString()),
+            loading: () => Text('LOADING'),
+            data: (userData) => Text(userData.toString()),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _TestPageState extends ConsumerState<TestPage> {
+/*
+class RecordListPage extends ConsumerStatefulWidget {
+  const RecordListPage({super.key});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _RecordListPageState();
+}
+
+class _RecordListPageState extends ConsumerState<RecordListPage> {
   bool _do = true;
 
   @override
@@ -72,3 +97,4 @@ class _TestPageState extends ConsumerState<TestPage> {
     );
   }
 }
+*/

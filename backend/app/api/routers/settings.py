@@ -21,8 +21,10 @@ router = APIRouter(
 
 
 @router.get("/all")
-def get_all_settings():
-    return settings.data
+def get_all_settings() -> dict[str, Any]:
+    return {
+        key: value.value for key, value in settings.data.items() if not value.private
+    }
 
 
 @router.get("/{key}")
@@ -35,12 +37,4 @@ def get_setting(key: str):
 
 @router.post("/{key}")
 def set_setting(key: str, value: Annotated[Any, Body()]):
-    try:
-        value = int(value)
-    except ValueError:
-        try:
-            value = float(value)
-        except ValueError:
-            pass
-
     settings.set(key, value)

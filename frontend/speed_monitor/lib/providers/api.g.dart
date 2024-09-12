@@ -6,7 +6,7 @@ part of 'api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authTokenHash() => r'5e01318f54b52afe6596def78821aa13b8373900';
+String _$authTokenHash() => r'f2ef118fba5f64eb1040ff26c452bfa8c6b43904';
 
 /// See also [authToken].
 @ProviderFor(authToken)
@@ -20,6 +20,20 @@ final authTokenProvider = AutoDisposeProvider<String?>.internal(
 );
 
 typedef AuthTokenRef = AutoDisposeProviderRef<String?>;
+String _$loginHash() => r'75b0600d69dbe4a508c44cd71984c5cd986d7487';
+
+/// See also [login].
+@ProviderFor(login)
+final loginProvider = AutoDisposeProvider<LoginDetails?>.internal(
+  login,
+  name: r'loginProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$loginHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef LoginRef = AutoDisposeProviderRef<LoginDetails?>;
 String _$apiHash() => r'b45521f58a806120082ef193dac6993d5b9990ea';
 
 /// See also [api].
@@ -34,7 +48,7 @@ final apiProvider = AutoDisposeProvider<SpeedMonitorApiClient>.internal(
 );
 
 typedef ApiRef = AutoDisposeProviderRef<SpeedMonitorApiClient>;
-String _$userInfoHash() => r'fe73dfdf551f418879e7b17403e5514e9adcd59d';
+String _$userInfoHash() => r'479b3227a5bc846ee045532ea9ebea59ea92bc3c';
 
 /// See also [userInfo].
 @ProviderFor(userInfo)

@@ -4,12 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:speed_monitor/models/service.dart';
 
-import 'package:speed_monitor/pages/home_page.dart';
-import 'package:speed_monitor/pages/incidents_page.dart';
-import 'package:speed_monitor/pages/settings_page.dart';
-import 'package:speed_monitor/screens/service_details_screen.dart';
+import 'package:speed_monitor/ui/home/home_page.dart';
+import 'package:speed_monitor/ui/incidents/incidents_page.dart';
+import 'package:speed_monitor/ui/settings/settings_page.dart';
+import 'package:speed_monitor/providers/api.dart';
+import 'package:speed_monitor/ui/login_screen.dart';
+import 'package:speed_monitor/ui/home/service_details_screen.dart';
+import 'package:speed_monitor/ui/settings/service_settings_screen.dart';
 
 import 'package:speed_monitor/test_page.dart';
+import 'package:speed_monitor/ui/extras/async_value_wrapper.dart';
+import 'package:speed_monitor/ui/settings/users_settings_screen.dart';
 
 void main() async {
   await initializeDateFormatting('ru_RU', null);
@@ -17,15 +22,22 @@ void main() async {
   runApp(ProviderScope(child: MainApp()));
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
-  // TODO: Figure out routing
+  // ? TODO: Figure out routing
   MaterialPageRoute? routeGenerator(RouteSettings? settings) {
-    if (settings != null &&
-        settings.name == '/serviceDetails' &&
-        settings.arguments is Service) {
+    if (settings == null) return null;
+
+    if (settings.name == '/serviceDetails' && settings.arguments is Service) {
       return MaterialPageRoute(
+        builder: (ctx) => ServiceDetailsScreen(settings.arguments as Service),
+      );
+    }
+
+    if (settings.name == '/editService' && settings.arguments is Service) {
+      return MaterialPageRoute(
+        fullscreenDialog: true,
         builder: (ctx) => ServiceDetailsScreen(settings.arguments as Service),
       );
     }
@@ -34,21 +46,37 @@ class MainApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userInfoProvider);
+
+    // print(user);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.lightBlue,
+        colorSchemeSeed: Colors.blue,
         brightness: Brightness.light,
+        // inputDecorationTheme:
+        //     const InputDecorationTheme(border: OutlineInputBorder()),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.lightBlue,
         brightness: Brightness.dark,
+        // inputDecorationTheme:
+        //     const InputDecorationTheme(border: OutlineInputBorder()),
       ),
       themeMode: ThemeMode.system,
-      home: const MainScreen(),
+      home: AsyncValueConnectionWrapper(
+        value: user,
+        onData: (userData) =>
+            userData == null ? const LoginScreen() : const MainScreen(),
+      ),
+      routes: {
+        '/settings/services': (ctx) => const ServiceSettingsScreen(),
+        '/settings/users': (ctx) => const UsersSettingsScreen(),
+      },
       onGenerateRoute: routeGenerator,
     );
   }
@@ -69,14 +97,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const <Widget>[
-          Text('Главная страница'),
-          Text('Инциденты'),
-          Text('Настройки'),
-          Text('TEST'),
-        ][_pageIdx],
-      ),
+      // appBar: AppBar(
+      //   title: const <Widget>[
+      //     Text('Главная страница'),
+      //     Text('Инциденты'),
+      //     Text('Настройки'),
+      //     Text('TEST'),
+      //   ][_pageIdx],
+      // ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _pageIdx,
         onDestinationSelected: (idx) => setState(() {
@@ -86,14 +114,14 @@ class _MainScreenState extends State<MainScreen> {
           NavigationDestination(icon: Icon(Icons.home), label: 'Главная'),
           NavigationDestination(icon: Icon(Icons.warning), label: 'Инциденты'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Настройки'),
-          NavigationDestination(icon: Icon(Icons.track_changes), label: 'TEST'),
+          // NavigationDestination(icon: Icon(Icons.track_changes), label: 'TEST'),
         ],
       ),
       body: const <Widget>[
         HomePage(),
         IncidentsPage(),
         SettingsPage(),
-        TestPage(),
+        // TestPage(),
       ][_pageIdx],
     );
   }

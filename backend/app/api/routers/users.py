@@ -46,6 +46,7 @@ async def create_new_user(
         is None
     ):
         raise HTTPException(status_code=400, detail="Password is too weak")
+    # 1 capital letter, 1 lowercase letter, 1 number, 1 special character, min 8 chars
     if re.fullmatch(r"\w{3,20}", username) is None:
         raise HTTPException(status_code=400, detail="Username is invalid")
 
@@ -55,6 +56,14 @@ async def create_new_user(
         raise HTTPException(status_code=400, detail="Username already exists")
 
     return user
+
+
+@router.get("/all", dependencies=[Depends(auth_admin)])
+async def get_all_users():
+    with get_session() as sess:
+        query = select(User)
+        users = sess.exec(query).all()
+        return users
 
 
 @router.get("/{id}", dependencies=[Depends(auth_admin)])
@@ -76,6 +85,7 @@ async def update_user(
     is_admin: Annotated[bool | None, Body()] = None,
 ):
     with get_session() as sess:
+
         user = sess.get(User, id)
 
         if user is None:
@@ -86,7 +96,7 @@ async def update_user(
         if password is not None:
             user.hashed_password = hash_password(password)
         if is_admin is not None:
-            user.is_admin = user.is_admin
+            user.is_admin = is_admin
 
         sess.add(user)
         sess.commit()

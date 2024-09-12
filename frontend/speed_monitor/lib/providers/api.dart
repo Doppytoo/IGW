@@ -9,13 +9,23 @@ part 'api.g.dart';
 
 @riverpod
 String? authToken(AuthTokenRef ref) {
-  // return null;
-
-  // ! RUNNING WITH TEST TOKEN
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTcyNTEzODAwMH0.vCt5lmFQOb0ITCDqus5-BWoK7e7bEFb-C217Mkuym0E';
-
   final secureStorage = ref.watch(secureStorageProvider).requireValue;
   return secureStorage.get('token');
+}
+
+@riverpod
+LoginDetails? login(LoginRef ref) {
+  final secureStorage = ref.watch(secureStorageProvider).requireValue;
+
+  if (secureStorage.get('username') != null &&
+      secureStorage.get('password') != null) {
+    return LoginDetails(
+      username: secureStorage.get('username')!,
+      password: secureStorage.get('password')!,
+    );
+  }
+
+  return null;
 }
 
 @riverpod
@@ -35,14 +45,36 @@ SpeedMonitorApiClient api(ApiRef ref) {
 @riverpod
 Future<User?> userInfo(UserInfoRef ref) async {
   final api = ref.watch(apiProvider);
+  final link = ref.keepAlive();
+
   try {
     return await api.getCurrentUser();
   } on DioException catch (e) {
     if (e.type == DioExceptionType.badResponse &&
         e.response!.statusCode == 401) {
-      return null;
+      final login = ref.read(loginProvider);
+      if (login != null) {
+        try {
+          final token = await api.login(login);
+
+          ref.read(secureStorageProvider).requireValue.set('token', token);
+          ref.invalidate(authTokenProvider);
+        } on DioException catch (e) {
+          if (e.type == DioExceptionType.badResponse &&
+              e.response!.statusCode == 400) {
+            ref.read(secureStorageProvider).requireValue.remove('token');
+            ref.read(secureStorageProvider).requireValue.remove('username');
+            ref.read(secureStorageProvider).requireValue.remove('password');
+            ref.invalidate(authTokenProvider);
+          } else {
+            rethrow;
+          }
+        }
+      }
     } else {
       rethrow;
     }
   }
+
+  return null;
 }

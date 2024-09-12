@@ -80,6 +80,18 @@ def update_service(service_id: int, service: Service) -> Service:
             raise HTTPException(status_code=409, detail=e._message())
 
 
+@router.delete("/{service_id}", dependencies=[Depends(auth_admin)])
+def delete_service(service_id: int):
+    with get_session() as sess:
+        query = select(Service).where(Service.id == service_id)
+        svc = sess.exec(query).one_or_none()
+        if not svc:
+            raise HTTPException(status_code=404, detail="service not found")
+
+        sess.delete(svc)
+        sess.commit()
+
+
 @router.get("/{service_id}/ping")
 def ping_service(service_id: int) -> Record:
     with get_session() as sess:

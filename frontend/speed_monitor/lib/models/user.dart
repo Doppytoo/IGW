@@ -18,9 +18,16 @@ class User {
     required this.isAdmin,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'],
-        username: json['username'],
-        isAdmin: json['is_admin'],
-      );
+  User.fromJson(Map<String, dynamic> json)
+      : this(
+          id: json['id'],
+          username: json['username'],
+          isAdmin: json['is_admin'],
+        );
+
+  Map<String, Object> toJson() => {
+        'id': id,
+        'username': username,
+        'is_admin': isAdmin,
+      };
 }

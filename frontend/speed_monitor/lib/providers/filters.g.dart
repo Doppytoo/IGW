@@ -1,25 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'secure_storage.dart';
+part of 'filters.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$secureStorageHash() => r'1fb0f64b859439f1a3a681f8f4a893fbd12e50cb';
+String _$incidentFilterHash() => r'57750910d51f6850e418dfb48d0050d648f8b171';
 
-/// See also [secureStorage].
-@ProviderFor(secureStorage)
-final secureStorageProvider = AutoDisposeFutureProvider<SecureStorage>.internal(
-  secureStorage,
-  name: r'secureStorageProvider',
+/// See also [IncidentFilter].
+@ProviderFor(IncidentFilter)
+final incidentFilterProvider =
+    AutoDisposeNotifierProvider<IncidentFilter, IncidentFilterData>.internal(
+  IncidentFilter.new,
+  name: r'incidentFilterProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$secureStorageHash,
+      : _$incidentFilterHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef SecureStorageRef = AutoDisposeFutureProviderRef<SecureStorage>;
+typedef _$IncidentFilter = AutoDisposeNotifier<IncidentFilterData>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

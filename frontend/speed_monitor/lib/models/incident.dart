@@ -20,19 +20,20 @@ class Incident {
     this.service,
   });
 
-  factory Incident.fromJson(Map<String, dynamic> json) => Incident(
-        serviceId: json['service_id'],
-        id: json['id'],
-        timeStarted: DateTime.parse(json['time_started_at']),
-        pingTimeAtStart: json['ping_time_at_start'],
-        timeEnded:
-            json.containsKey('time_ended_at') && json['time_ended_at'] != null
-                ? DateTime.parse(json['time_ended_at'])
-                : null,
-        pingTimeAtEnd: json.containsKey('ping_time_at_end')
-            ? json['ping_time_at_end']
-            : null,
-      );
+  Incident.fromJson(Map<String, dynamic> json)
+      : this(
+          serviceId: json['service_id'],
+          id: json['id'],
+          timeStarted: DateTime.parse(json['time_started_at']),
+          pingTimeAtStart: json['ping_time_at_start'],
+          timeEnded:
+              json.containsKey('time_ended_at') && json['time_ended_at'] != null
+                  ? DateTime.parse(json['time_ended_at'])
+                  : null,
+          pingTimeAtEnd: json.containsKey('ping_time_at_end')
+              ? json['ping_time_at_end']
+              : null,
+        );
 
   Incident copyWith({
     int? id,
