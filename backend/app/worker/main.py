@@ -18,9 +18,8 @@ def main_loop():  # * Call this with threading.Thread(target=main_loop, daemon=t
     next_call = time.time()
     while True:
         settings.refresh()
-        ping_times = get_ping_times()
         with get_session() as sess:
-            records = make_records(ping_times, sess, save=True)
+            records = get_ping_times(sess, save=True, mode=settings.get("ping_mode"))
             incidents = process_incidents(records, sess, save=True)
             for incident in incidents:
                 sess.refresh(incident)

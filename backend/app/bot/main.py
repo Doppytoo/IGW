@@ -59,18 +59,36 @@ async def login_handler(message: Message, command: CommandObject) -> None:
             )
             return
 
-        query = select(TelegramAccount).where(TelegramAccount.token == login_code)
+        query = select(TelegramAccount).where(TelegramAccount.code == login_code)
         tgacc = sess.exec(query).one_or_none()
 
         if tgacc.account_id:
             await message.answer("This login code has already been used.")
         elif tgacc:
             tgacc.account_id = message.from_user.id
+            tgacc.full_name = message.from_user.full_name
+            tgacc.code = None
             sess.add(tgacc)
             sess.commit()
             await message.answer(f"Logged in as {hbold(tgacc.user.username)}.")
         else:
             await message.answer("Could not log in. Is your code valid?")
+
+
+@dp.message(Command("logout"))
+async def logout_handler(message: Message) -> None:
+    with get_session() as sess:
+        query = select(TelegramAccount).where(
+            TelegramAccount.account_id == message.from_user.id
+        )
+        tgacc = sess.exec(query).one_or_none()
+
+        if tgacc:
+            sess.delete(tgacc)
+            sess.commit()
+            await message.answer("Logged out successfully.")
+        else:
+            await message.answer("You are not currently logged in")
 
 
 @dp.message(Command("me"))

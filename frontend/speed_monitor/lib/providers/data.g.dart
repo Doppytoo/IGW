@@ -52,7 +52,7 @@ final recordsProvider =
 );
 
 typedef _$Records = AutoDisposeAsyncNotifier<List<SpeedRecord>>;
-String _$incidentsHash() => r'06ee727c344338508bc318043f6b872f0fd71623';
+String _$incidentsHash() => r'055955d2b3295cd6381a0516211cded21591a35d';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -77,14 +77,10 @@ class _SystemHash {
 
 abstract class _$Incidents
     extends BuildlessAutoDisposeAsyncNotifier<List<Incident>> {
-  late final int? serviceId;
-  late final DateTime? start;
-  late final DateTime? end;
+  late final IncidentFilterData filter;
 
   FutureOr<List<Incident>> build({
-    int? serviceId,
-    DateTime? start,
-    DateTime? end,
+    IncidentFilterData filter = const IncidentFilterData(),
   });
 }
 
@@ -99,14 +95,10 @@ class IncidentsFamily extends Family<AsyncValue<List<Incident>>> {
 
   /// See also [Incidents].
   IncidentsProvider call({
-    int? serviceId,
-    DateTime? start,
-    DateTime? end,
+    IncidentFilterData filter = const IncidentFilterData(),
   }) {
     return IncidentsProvider(
-      serviceId: serviceId,
-      start: start,
-      end: end,
+      filter: filter,
     );
   }
 
@@ -115,9 +107,7 @@ class IncidentsFamily extends Family<AsyncValue<List<Incident>>> {
     covariant IncidentsProvider provider,
   ) {
     return call(
-      serviceId: provider.serviceId,
-      start: provider.start,
-      end: provider.end,
+      filter: provider.filter,
     );
   }
 
@@ -141,14 +131,9 @@ class IncidentsProvider
     extends AutoDisposeAsyncNotifierProviderImpl<Incidents, List<Incident>> {
   /// See also [Incidents].
   IncidentsProvider({
-    int? serviceId,
-    DateTime? start,
-    DateTime? end,
+    IncidentFilterData filter = const IncidentFilterData(),
   }) : this._internal(
-          () => Incidents()
-            ..serviceId = serviceId
-            ..start = start
-            ..end = end,
+          () => Incidents()..filter = filter,
           from: incidentsProvider,
           name: r'incidentsProvider',
           debugGetCreateSourceHash:
@@ -157,9 +142,7 @@ class IncidentsProvider
                   : _$incidentsHash,
           dependencies: IncidentsFamily._dependencies,
           allTransitiveDependencies: IncidentsFamily._allTransitiveDependencies,
-          serviceId: serviceId,
-          start: start,
-          end: end,
+          filter: filter,
         );
 
   IncidentsProvider._internal(
@@ -169,23 +152,17 @@ class IncidentsProvider
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.serviceId,
-    required this.start,
-    required this.end,
+    required this.filter,
   }) : super.internal();
 
-  final int? serviceId;
-  final DateTime? start;
-  final DateTime? end;
+  final IncidentFilterData filter;
 
   @override
   FutureOr<List<Incident>> runNotifierBuild(
     covariant Incidents notifier,
   ) {
     return notifier.build(
-      serviceId: serviceId,
-      start: start,
-      end: end,
+      filter: filter,
     );
   }
 
@@ -194,18 +171,13 @@ class IncidentsProvider
     return ProviderOverride(
       origin: this,
       override: IncidentsProvider._internal(
-        () => create()
-          ..serviceId = serviceId
-          ..start = start
-          ..end = end,
+        () => create()..filter = filter,
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        serviceId: serviceId,
-        start: start,
-        end: end,
+        filter: filter,
       ),
     );
   }
@@ -218,32 +190,21 @@ class IncidentsProvider
 
   @override
   bool operator ==(Object other) {
-    return other is IncidentsProvider &&
-        other.serviceId == serviceId &&
-        other.start == start &&
-        other.end == end;
+    return other is IncidentsProvider && other.filter == filter;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, serviceId.hashCode);
-    hash = _SystemHash.combine(hash, start.hashCode);
-    hash = _SystemHash.combine(hash, end.hashCode);
+    hash = _SystemHash.combine(hash, filter.hashCode);
 
     return _SystemHash.finish(hash);
   }
 }
 
 mixin IncidentsRef on AutoDisposeAsyncNotifierProviderRef<List<Incident>> {
-  /// The parameter `serviceId` of this provider.
-  int? get serviceId;
-
-  /// The parameter `start` of this provider.
-  DateTime? get start;
-
-  /// The parameter `end` of this provider.
-  DateTime? get end;
+  /// The parameter `filter` of this provider.
+  IncidentFilterData get filter;
 }
 
 class _IncidentsProviderElement
@@ -252,14 +213,10 @@ class _IncidentsProviderElement
   _IncidentsProviderElement(super.provider);
 
   @override
-  int? get serviceId => (origin as IncidentsProvider).serviceId;
-  @override
-  DateTime? get start => (origin as IncidentsProvider).start;
-  @override
-  DateTime? get end => (origin as IncidentsProvider).end;
+  IncidentFilterData get filter => (origin as IncidentsProvider).filter;
 }
 
-String _$usersHash() => r'df4cff11a2767142430c0777cac035b1c93edc94';
+String _$usersHash() => r'715fde6189360d0c57f2d24a651395266a811d2b';
 
 /// See also [Users].
 @ProviderFor(Users)

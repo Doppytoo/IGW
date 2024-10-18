@@ -25,7 +25,9 @@ class AsyncValueConnectionWrapper<T> extends StatelessWidget {
     if (e is DioException) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
-        return Material(child: Center(child: ConnectionErrorCard(e)));
+        return Material(
+            child: Center(
+                child: ConnectionErrorCard(error: e, showRetryButton: true)));
       }
     }
 

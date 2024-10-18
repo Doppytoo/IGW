@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:speed_monitor/models/service.dart';
+import 'package:speed_monitor/providers/preferences.dart';
 
 import 'package:speed_monitor/ui/home/home_page.dart';
 import 'package:speed_monitor/ui/incidents/incidents_page.dart';
@@ -48,11 +49,13 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userInfoProvider);
+    final theme = ref.watch(appThemeProvider);
 
     // print(user);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      themeMode: theme,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
@@ -67,7 +70,6 @@ class MainApp extends ConsumerWidget {
         // inputDecorationTheme:
         //     const InputDecorationTheme(border: OutlineInputBorder()),
       ),
-      themeMode: ThemeMode.system,
       home: AsyncValueConnectionWrapper(
         value: user,
         onData: (userData) =>

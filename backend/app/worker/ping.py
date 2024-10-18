@@ -1,4 +1,5 @@
 import requests
+from selenium import webdriver
 from datetime import datetime
 from sqlmodel import select, Session
 from typing import List
@@ -10,22 +11,66 @@ from ..settings import settings
 prometheus_url = settings.get("PROMETHEUS_URL")
 
 
-def get_ping_times(mode: str = "prometheus") -> dict[str, float]:
+def get_ping_times(
+    sess: Session, save: bool = False, mode: str = "manual"
+) -> list[Record]:
+    records: List[Record] = []
+
     if mode == "manual":
-        return _get_ping_times_manual()
+        records = _get_ping_times_manual(sess)
     elif mode == "prometheus":
-        return _get_ping_times_prometheus()
+        records = _get_ping_times_prometheus(sess)
     else:
         raise ValueError(f"Unknown ping mode: {mode}")
 
+    if save:
+        sess.add_all(records)
+        sess.commit()
 
-def _get_ping_times_manual():
-    # TODO: implement manual ping (using Selenium)
-
-    return {}
+    return records
 
 
-def _get_ping_times_prometheus():
+def _get_ping_times_manual(sess: Session):
+    # TODO: test this
+    options = webdriver.FirefoxOptions()
+    options.add_argument("--headless")
+    driver = webdriver.Firefox(options=options)
+
+    services = sess.exec(select(Service))
+
+    records: List[Record] = []
+    for svc in services:
+        driver.get(svc.url)
+        # Use Navigation Timing  API to calculate the timings that matter the most
+        navigation_start = driver.execute_script(
+            "return window.performance.timing.navigationStart"
+        )
+        response_start = driver.execute_script(
+            "return window.performance.timing.responseStart"
+        )
+        dom_complete = driver.execute_script(
+            "return window.performance.timing.domComplete"
+        )
+
+        # Calculate the performance
+        backend_performance = response_start - navigation_start
+        frontend_performance = dom_complete - response_start
+
+        records.append(
+            Record(
+                time_recorded_at=datetime.now(),
+                ping_time=backend_performance + frontend_performance,
+                service=svc,
+            )
+        )
+
+        # print("Back End: %s" % backend_performance)
+        # print("Front End: %s" % frontend_performance)
+
+    return records
+
+
+def _get_ping_times_prometheus(sess: Session):
     response = requests.get(
         prometheus_url + "/api/v1/query?query=probe_duration_seconds"
     )
@@ -34,7 +79,20 @@ def _get_ping_times_prometheus():
     data = response.json()["data"]["result"]
 
     results = {site["metric"]["instance"]: float(site["value"][1]) for site in data}
-    return results
+
+    now = datetime.now()
+    records: List[Record] = []
+
+    for site_url, ping_time in results.items():
+        query = select(Service).where(Service.url == site_url)
+        svc = sess.exec(query).one_or_none()
+        # if not svc:
+        #     svc = Service(url=site_url, name=site_url, ping_threshold=0.5)
+        if svc:
+            rec = Record(ping_time=ping_time, service=svc, time_recorded_at=now)
+            records.append(rec)
+
+    return records
 
 
 def make_records(

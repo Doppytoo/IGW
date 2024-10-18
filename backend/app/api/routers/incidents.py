@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import select
+from fastapi import APIRouter, HTTPException, Depends, Query
+from sqlmodel import select, text
 from datetime import datetime
+from typing import List, Annotated
 
 from ...data.models import Incident
 from ...data.db import get_session
@@ -39,15 +40,18 @@ def get_incident(incident_id: int) -> Incident:
 def get_incidents(
     skip: int = 0,
     lim: int = 100,
-    service_id: int = None,
+    service_id: Annotated[List[int] | None, Query()] = None,
     period_start: datetime = None,
     period_end: datetime = None,
     has_ended: bool = None,
 ) -> list[Incident]:
+    print(service_id)
+
     with get_session() as sess:
         query = select(Incident).order_by(Incident.id.desc())
         if service_id:
-            query = query.where(Incident.service_id == service_id)
+            ids_sqlified = "(" + ", ".join(map(str, service_id)) + ")"
+            query = query.where(text(rf"service_id IN {ids_sqlified}"))
         if period_start:
             query = query.where(Incident.time_started_at >= period_start)
         if period_end:

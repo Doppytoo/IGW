@@ -8,6 +8,7 @@ import 'package:speed_monitor/models/record.dart';
 import 'package:speed_monitor/models/service.dart';
 import 'package:speed_monitor/models/user.dart';
 import 'package:speed_monitor/providers/api.dart';
+import 'package:speed_monitor/providers/filters.dart';
 
 part 'data.g.dart';
 
@@ -137,30 +138,34 @@ class Records extends _$Records {
 @riverpod
 class Incidents extends _$Incidents {
   static const incidentsPerPage = 30;
+  bool canLoadMore = true;
 
   @override
   Future<List<Incident>> build({
-    int? serviceId,
-    DateTime? start,
-    DateTime? end,
+    IncidentFilterData filter = const IncidentFilterData(),
   }) async {
     final SpeedMonitorApiClient api = ref.watch(apiProvider);
     final List<Service> services = ref.watch(servicesProvider).requireValue;
 
     try {
-      return (await api.getIncidients(
+      final incidents = (await api.getIncidients(
         lim: incidentsPerPage,
-        serviceId: serviceId,
-        start: start,
-        end: end,
+        serviceIds: filter.serviceIds,
+        start: filter.start,
+        end: filter.end,
       ))
           .map((i) => i.copyWith(
               service: services.firstWhere((svc) => svc.id == i.serviceId)))
           .toList();
+
+      if (incidents.length < incidentsPerPage) canLoadMore = false;
+
+      return incidents;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.badResponse &&
           e.response!.statusCode == 404) {
-        return [];
+        canLoadMore = false;
+        return const [];
       } else {
         rethrow;
       }
@@ -168,6 +173,8 @@ class Incidents extends _$Incidents {
   }
 
   Future<void> loadMore() async {
+    if (!canLoadMore) return;
+
     final oldIncidents = await future;
 
     state = const AsyncLoading();
@@ -179,9 +186,9 @@ class Incidents extends _$Incidents {
         final newIncidents = (await ref.read(apiProvider).getIncidients(
                   lim: incidentsPerPage,
                   skip: oldIncidents.length,
-                  serviceId: serviceId,
-                  start: start,
-                  end: end,
+                  serviceIds: filter.serviceIds,
+                  start: filter.start,
+                  end: filter.end,
                 ))
             .map((i) => i.copyWith(
                 service: services.firstWhere((svc) => svc.id == i.serviceId)))
@@ -191,6 +198,7 @@ class Incidents extends _$Incidents {
       } on DioException catch (e) {
         if (e.type == DioExceptionType.badResponse &&
             e.response!.statusCode == 404) {
+          canLoadMore = false;
           return oldIncidents;
         } else {
           rethrow;

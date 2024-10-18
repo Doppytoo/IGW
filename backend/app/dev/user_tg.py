@@ -11,7 +11,7 @@ def main() -> None:
 
         new_user.telegram_accounts.append(
             TelegramAccount(
-                token="asdfghjkl",
+                code="asdfghjkl",
             )
         )
 

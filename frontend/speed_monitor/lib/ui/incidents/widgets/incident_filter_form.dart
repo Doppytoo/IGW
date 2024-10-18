@@ -20,31 +20,60 @@ class IncidentFilterForm extends ConsumerWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DropdownButton<int?>(
-              value: filter.serviceId,
-              hint: Text('Select Service'),
-              items: [
-                const DropdownMenuItem(value: null, child: Text('All')),
-                ...ref.watch(servicesProvider).requireValue.map((service) {
-                  return DropdownMenuItem<int>(
-                    value: service.id,
-                    child: SizedBox(
-                      width: min(constraints.maxWidth - 72, 480 - 72),
-                      child: Text(
-                        service.name,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+            // DropdownButton<int?>(
+            //   value: filter.serviceIds?[0],
+            //   hint: Text('Select Service'),
+            //   items: [
+            //     const DropdownMenuItem(value: null, child: Text('All')),
+            //     ...ref.watch(servicesProvider).requireValue.map((service) {
+            //       return DropdownMenuItem<int>(
+            //         value: service.id,
+            //         child: SizedBox(
+            //           width: min(constraints.maxWidth - 72, 480 - 72),
+            //           child: Text(
+            //             service.name,
+            //             overflow: TextOverflow.ellipsis,
+            //           ),
+            //         ),
+            //       );
+            //     })
+            //   ],
+            //   onChanged: (value) {
+            //     ref
+            //         .read(incidentFilterProvider.notifier)
+            //         .updateServiceIds(value != null ? [value] : []);
+            //   },
+            // ),
+            Text(
+              'Services',
+              style: Theme.of(context).inputDecorationTheme.labelStyle,
+            ),
+            SizedBox(
+              width: min(constraints.maxWidth - 48, 432),
+              height: min(constraints.maxHeight - 240, 360),
+              child: ListView(
+                children:
+                    ref.watch(servicesProvider).requireValue.map((service) {
+                  return CheckboxListTile(
+                    contentPadding: const EdgeInsets.all(0),
+                    title: Text(service.name),
+                    value: filter.serviceIds.contains(service.id),
+                    onChanged: (value) {
+                      if (value ?? false) {
+                        ref
+                            .read(incidentFilterProvider.notifier)
+                            .addServiceId(service.id);
+                      } else {
+                        ref
+                            .read(incidentFilterProvider.notifier)
+                            .removeServiceId(service.id);
+                      }
+                    },
                   );
-                })
-              ],
-              onChanged: (value) {
-                ref
-                    .read(incidentFilterProvider.notifier)
-                    .updateServiceId(value);
-              },
+                }).toList(),
+              ),
             ),
             Row(
               children: [

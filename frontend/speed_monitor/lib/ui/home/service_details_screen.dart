@@ -22,7 +22,7 @@ class ServiceDetailsScreen extends ConsumerWidget {
           ServiceStatusGraph(),
           Flexible(
             child: IncidentList(
-              filter: IncidentFilterData(serviceId: service.id),
+              filter: IncidentFilterData(serviceIds: [service.id]),
             ),
           ),
         ],

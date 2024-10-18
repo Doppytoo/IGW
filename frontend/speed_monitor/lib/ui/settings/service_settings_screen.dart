@@ -36,7 +36,21 @@ class ServiceSettingsScreen extends ConsumerWidget {
         onData: (services) => ListView.builder(
           itemCount: services.length,
           itemBuilder: (ctx, idx) => ListTile(
-            leading: CircleAvatar(child: Text(services[idx].id.toString())),
+            leading: Card.filled(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.speed),
+                    const SizedBox(width: 4),
+                    Text('${services[idx].pingThreshold}с',
+                        style: Theme.of(context).textTheme.titleSmall)
+                  ],
+                ),
+              ),
+              // child: ,
+            ),
             title: Text(services[idx].name),
             subtitle: Text(services[idx].url),
             trailing: Row(

@@ -14,6 +14,11 @@ _DEFAULTS = {
         "description": "Telegram bot token",
         "private": True,
     },
+    "ping_mode": {
+        "value": "manual",
+        "description": "Website speed measure mode",
+        "private": True,
+    },
     "ping_interval": {
         "value": 10,
         "description": "Ping interval in minutes",

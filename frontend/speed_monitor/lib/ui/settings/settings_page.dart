@@ -3,9 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speed_monitor/models/telegram_account.dart';
+import 'package:speed_monitor/providers/preferences.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:speed_monitor/providers/api.dart';
 import 'package:speed_monitor/providers/backend_settings.dart';
 import 'package:speed_monitor/providers/secure_storage.dart';
+import 'package:speed_monitor/providers/telegram.dart';
 import 'package:speed_monitor/ui/extras/async_value_wrapper.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -65,7 +71,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final currentUserAsync = ref.watch(userInfoProvider);
-    // TODO: Telegram linking
+    // TODO: Refresh (on telegram link?)
 
     return Scaffold(
         appBar: AppBar(
@@ -81,6 +87,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         body: AsyncValueConnectionWrapper(
             value: currentUserAsync,
             onData: (currentUser) {
+              if (currentUser != null) {
+                ref.watch(telegramLinkProvider);
+              }
+
               if (currentUser != null && currentUser.isAdmin) {
                 final currentSettings = ref.watch(backendSettingsProvider);
                 return AsyncValueConnectionWrapper(
@@ -107,89 +117,49 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       children: [
                         Card.outlined(
                           margin: EdgeInsets.all(8.0),
-                          // color: Theme.of(context).colorScheme.secondaryContainer,
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
                               children: [
-                                Text(
-                                  currentUser.username,
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      currentUser.username,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    FilledButton.icon(
+                                      style: FilledButton.styleFrom(
+                                          foregroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .onErrorContainer,
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .errorContainer),
+                                      label: Text('Выйти'),
+                                      icon: Icon(Icons.logout),
+                                      onPressed: () {
+                                        ref
+                                            .read(secureStorageProvider)
+                                            .requireValue
+                                          ..remove('token')
+                                          ..remove('username')
+                                          ..remove('password');
+                                        ref.invalidate(authTokenProvider);
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                FilledButton.icon(
-                                  style: FilledButton.styleFrom(
-                                      foregroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .onErrorContainer,
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .errorContainer),
-                                  label: Text('Выйти'),
-                                  icon: Icon(Icons.logout),
-                                  onPressed: () {
-                                    ref.read(secureStorageProvider).requireValue
-                                      ..remove('token')
-                                      ..remove('username')
-                                      ..remove('password');
-                                    ref.invalidate(authTokenProvider);
-                                  },
-                                ),
+                                const SizedBox(height: 8),
+                                TelegramLinkTile(),
                               ],
                             ),
                           ),
                         ),
-                        ListTile(
-                          title: Text('Тема приложения'),
-                          trailing: DropdownButtonHideUnderline(
-                            child: DropdownButton(
-                              value: ThemeMode.system,
-                              items: const <DropdownMenuItem>[
-                                DropdownMenuItem(
-                                  value: ThemeMode.system,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.contrast),
-                                      SizedBox(width: 8),
-                                      Text('Системная'),
-                                    ],
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: ThemeMode.light,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.light_mode),
-                                      SizedBox(width: 8),
-                                      Text('Светлая'),
-                                    ],
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: ThemeMode.dark,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.dark_mode),
-                                      SizedBox(width: 8),
-                                      Text('Тёмная'),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              onChanged: (value) {},
-                            ),
-                          ),
-                        ),
+                        AppThemeSelectionTile(),
 
                         const Divider(indent: 8, endIndent: 8),
                         ListTile(
@@ -265,35 +235,40 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   children: [
                     Card.outlined(
                       margin: EdgeInsets.all(8.0),
-                      // color: Theme.of(context).colorScheme.secondaryContainer,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
                           children: [
-                            Text(
-                              currentUser!.username,
-                              style: Theme.of(context).textTheme.bodyLarge,
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  currentUser!.username,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onErrorContainer,
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .errorContainer),
+                                  label: Text('Выйти'),
+                                  icon: Icon(Icons.logout),
+                                  onPressed: () {
+                                    ref.read(secureStorageProvider).requireValue
+                                      ..remove('token')
+                                      ..remove('username')
+                                      ..remove('password');
+                                    ref.invalidate(authTokenProvider);
+                                  },
+                                ),
+                              ],
                             ),
-                            FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                  foregroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .onErrorContainer,
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .errorContainer),
-                              label: Text('Выйти'),
-                              icon: Icon(Icons.logout),
-                              onPressed: () {
-                                ref.read(secureStorageProvider).requireValue
-                                  ..remove('token')
-                                  ..remove('username')
-                                  ..remove('password');
-                                ref.invalidate(authTokenProvider);
-                              },
-                            ),
+                            const SizedBox(height: 8),
+                            TelegramLinkTile(),
                           ],
                         ),
                       ),
@@ -345,14 +320,211 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         ),
                       ),
                     ),
-
-                    // AboutListTile(
-                    //   icon: Icon(Icons.info),
-
-                    // ),
                   ],
                 );
               }
             }));
+  }
+}
+
+class AppThemeSelectionTile extends ConsumerWidget {
+  const AppThemeSelectionTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentTheme = ref.watch(appThemeProvider);
+
+    return ListTile(
+      title: Text('Тема приложения'),
+      trailing: DropdownButtonHideUnderline(
+        child: DropdownButton(
+          value: currentTheme,
+          items: const <DropdownMenuItem>[
+            DropdownMenuItem(
+              value: ThemeMode.system,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.contrast),
+                  SizedBox(width: 8),
+                  Text('Системная'),
+                ],
+              ),
+            ),
+            DropdownMenuItem(
+              value: ThemeMode.light,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.light_mode),
+                  SizedBox(width: 8),
+                  Text('Светлая'),
+                ],
+              ),
+            ),
+            DropdownMenuItem(
+              value: ThemeMode.dark,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.dark_mode),
+                  SizedBox(width: 8),
+                  Text('Тёмная'),
+                ],
+              ),
+            ),
+          ],
+          onChanged: (value) async {
+            await ref
+                .read(appThemeProvider.notifier)
+                .setTheme(value as ThemeMode);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class TelegramLinkTile extends ConsumerWidget {
+  const TelegramLinkTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final telegramAccountAsync = ref.watch(telegramLinkProvider);
+
+    return AsyncValueConnectionWrapper(
+      value: telegramAccountAsync,
+      onData: (telegramAccount) => Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.telegram),
+              const SizedBox(width: 8),
+              Text(
+                telegramAccount != null ? telegramAccount.fullName : 'Telegram',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          ),
+          telegramAccount == null
+              ? FilledButton.tonalIcon(
+                  // style: FilledButton.styleFrom(
+                  //     foregroundColor: Theme.of(context)
+                  //         .colorScheme
+                  //         .onErrorContainer,
+                  //     backgroundColor: Theme.of(context)
+                  //         .colorScheme
+                  //         .errorContainer),
+                  label: Text('Привязать'),
+                  icon: Icon(Icons.add_link),
+                  onPressed: () {
+                    final codeFuture =
+                        ref.read(telegramLinkProvider.notifier).linkNew();
+
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => FutureBuilder(
+                          future: codeFuture,
+                          builder: (ctx, code) {
+                            if (code.hasData) {
+                              return AlertDialog(
+                                title: Text(code.requireData),
+                                content: Text(
+                                    'Чтобы привязать Telegram, нажмите кнопку ниже или отправьте этот код в телеграм-бот с помощью команды /login'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(ctx).pop();
+                                    },
+                                    child: const Text('Готово'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () async {
+                                      final url = Uri.parse(
+                                          'https://t.me/LorraineChungBot?start=${code.requireData}');
+
+                                      final launched = await launchUrl(url);
+
+                                      if (launched && ctx.mounted) {
+                                        Navigator.of(ctx).pop();
+                                      }
+                                    },
+                                    child: const Text('Открыть Telegram'),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return Dialog(
+                              child: const CircularProgressIndicator.adaptive(),
+                            );
+                          }),
+                    );
+                  },
+                )
+              : FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onErrorContainer,
+                      backgroundColor:
+                          Theme.of(context).colorScheme.errorContainer),
+                  label: Text('Отвязать'),
+                  icon: Icon(Icons.link_off),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title:
+                            Text('Вы уверены, что хотите отвязать Telegram?'),
+                        content: Text('Это действие не может быть отменено!'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                            child: const Text('Нет'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(telegramLinkProvider.notifier)
+                                  .unlink();
+
+                              if (ctx.mounted) {
+                                Navigator.of(ctx).pop();
+                              }
+                            },
+                            child: const Text('Да'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                )
+          // : FilledButton.tonalIcon(
+          //     style: FilledButton.styleFrom(
+          //         foregroundColor:
+          //             Theme.of(context).colorScheme.onErrorContainer,
+          //         backgroundColor:
+          //             Theme.of(context).colorScheme.errorContainer),
+          //     label: Text('Отвязать'),
+          //     icon: Icon(Icons.link_off),
+          //     onPressed: () {
+          //       showDialog(
+          //         context: context,
+          //         builder: (ctx) => Placeholder(),
+          //       );
+          //     },
+          //   )
+        ],
+      ),
+    );
   }
 }

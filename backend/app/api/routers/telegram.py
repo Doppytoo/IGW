@@ -39,7 +39,9 @@ def generate_tg_code(user: User) -> str:
 async def my_telegram(user: User = Depends(auth)) -> List[TelegramAccount]:
     with get_session() as sess:
         sess.add(user)
-        return user.telegram_accounts
+        return [
+            tgacc for tgacc in user.telegram_accounts if tgacc.account_id is not None
+        ]
 
 
 @router.get("/link")
@@ -47,12 +49,20 @@ async def link_telegram(user: User = Depends(auth)):
     code = generate_tg_code(user)
 
     with get_session() as sess:
+        query = select(TelegramAccount).where(TelegramAccount.user == user)
+        tgacc = sess.exec(query).one_or_none()
+        if tgacc is not None and tgacc.account_id is None:
+            sess.delete(tgacc)
+            sess.commit()
+
+        if tgacc is not None:
+            raise HTTPException(
+                status_code=400, detail="Telegram account already linked"
+            )
+
         while True:
             try:
-                tgacc = TelegramAccount(
-                    user=user,
-                    token=code,
-                )
+                tgacc = TelegramAccount(user=user, code=code)
 
                 sess.add(tgacc)
                 sess.commit()
@@ -62,6 +72,17 @@ async def link_telegram(user: User = Depends(auth)):
                 continue
 
     return {"code": code}
+
+
+@router.delete("/unlink")
+async def unlink_telegram(user: User = Depends(auth)):
+    with get_session() as sess:
+        query = select(TelegramAccount).where(TelegramAccount.user == user)
+        tgacc = sess.exec(query).first()
+        if tgacc is None:
+            raise HTTPException(status_code=404, detail="Telegram account not found")
+        sess.delete(tgacc)
+        sess.commit()
 
 
 if __name__ == "__main__":

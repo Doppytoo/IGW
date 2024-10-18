@@ -6,7 +6,7 @@ part of 'filters.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$incidentFilterHash() => r'57750910d51f6850e418dfb48d0050d648f8b171';
+String _$incidentFilterHash() => r'eb43e0ade4c662e8a36d522fddfabb52f13d7a11';
 
 /// See also [IncidentFilter].
 @ProviderFor(IncidentFilter)

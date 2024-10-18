@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:speed_monitor/models/incident.dart';
 import 'package:speed_monitor/models/record.dart';
 import 'package:speed_monitor/models/service.dart';
+import 'package:speed_monitor/models/telegram_account.dart';
 import 'package:speed_monitor/models/user.dart';
 
 class SpeedMonitorApiClient {
@@ -38,14 +39,14 @@ class SpeedMonitorApiClient {
   Future<List<Incident>> getIncidients({
     int skip = 0,
     int lim = 100,
-    int? serviceId,
+    List<int> serviceIds = const [],
     DateTime? start,
     DateTime? end,
   }) async {
     final resp = await _httpClient.get('/incidents', queryParameters: {
       'skip': skip,
       'lim': lim,
-      if (serviceId != null) 'service_id': serviceId,
+      'service_id': serviceIds,
       if (start != null) 'period_start': start.toIso8601String(),
       if (end != null) 'period_end': end.toIso8601String(),
     });
@@ -174,6 +175,25 @@ class SpeedMonitorApiClient {
 
   Future<void> deleteUser(int id) async {
     await _httpClient.delete('/users/$id');
+  }
+
+  // * Telegram
+  Future<TelegramAccount?> getCurrentTelegram() async {
+    final resp = await _httpClient.get('/telegram/my');
+
+    return (resp.data as List).isNotEmpty
+        ? TelegramAccount.fromJson(resp.data[0])
+        : null;
+  }
+
+  Future<String> linkTelegram() async {
+    final resp = await _httpClient.get('/telegram/link');
+
+    return (resp.data as Map<String, dynamic>)['code'];
+  }
+
+  Future<void> unlinkTelegram() async {
+    await _httpClient.delete('/telegram/unlink');
   }
 
   // * Settings

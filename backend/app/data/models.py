@@ -65,9 +65,10 @@ class User(SQLModel, table=True):
 
 
 class TelegramAccount(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    token: str = Field(unique=True, exclude=True)
+    id: Optional[int] = Field(default=None, primary_key=True, exclude=True)
+    code: Optional[str] = Field(unique=True, exclude=True, nullable=True)
     account_id: Optional[int] = Field(unique=True, nullable=True)
+    full_name: Optional[str] = Field(nullable=True)
 
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     user: Optional[User] = Relationship(back_populates="telegram_accounts")
