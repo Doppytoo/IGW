@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import sys
-from os import getenv
+import os
 
 from aiogram import Bot, Dispatcher, Router, types
 from aiogram.enums import ParseMode
@@ -19,7 +19,7 @@ from ..data.db import get_session
 from ..settings import Settings
 
 # Bot token can be obtained via https://t.me/BotFather
-TOKEN = Settings().get("TG_BOT_TOKEN")
+TOKEN = os.environ["TG_BOT_TOKEN"]
 
 # All handlers should be attached to the Router (or Dispatcher)
 dp = Dispatcher()
@@ -129,6 +129,17 @@ async def report_incidents_cor(incidents: List[Incident], users: List[User]):
 def report_incidents(incidents: List[Incident], users: List[User]):
 
     asyncio.run(report_incidents_cor(incidents, users))
+
+
+def report_incidents_if_open(incidents: List[Incident], users: List[User]):
+    with get_session() as sess:
+        open_incidents = []
+        for inc in incidents:
+            sess.refresh(inc)
+            if not inc.has_ended:
+                open_incidents.append(inc)
+
+    report_incidents(open_incidents, users)
 
 
 @dp.message(CommandStart(deep_link=False))

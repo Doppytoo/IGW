@@ -1,8 +1,10 @@
+from datetime import datetime, date, time, timedelta
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from sqlalchemy.exc import IntegrityError
 
-from ...data.models import Service, Record
+from ...data.models import Service, Record, Incident, EssentialMetrics
 from ...data.db import get_session
 
 from ..auth import auth, auth_admin
@@ -108,3 +110,44 @@ def ping_service(service_id: int) -> Record:
             raise HTTPException(status_code=404, detail="no record found")
 
         return record
+
+
+@router.get("/{service_id}/metrics")
+def ping_service(service_id: int) -> EssentialMetrics:
+    end = datetime.combine(date.today(), time.min)
+    start = end - timedelta(days=7)
+
+    with get_session() as sess:
+
+        base_query = (
+            select(Incident)
+            .where(Incident.service_id == service_id)
+            .where(Incident.time_started_at <= end)
+        )
+
+        incidents: list[Incident] = []
+
+        incidents.extend(sess.exec(base_query.where(Incident.time_ended_at >= start)))
+        incidents.extend(sess.exec(base_query.where(Incident.time_ended_at == None)))
+
+        service = sess.exec(select(Service).where(Service.id == service_id)).one()
+
+        total_time = timedelta()
+        max_ping_time = 0
+        for incident in incidents:
+            if incident.has_ended:
+                total_time += incident.time_ended_at - max(
+                    incident.time_started_at, start
+                )
+            else:
+                total_time += end - max(incident.time_started_at, start)
+
+            if incident.ping_time_at_start > max_ping_time:
+                max_ping_time = incident.ping_time_at_start
+
+        return EssentialMetrics(
+            service_id=service_id,
+            number_of_incidents=len(incidents),
+            total_incident_time=round(total_time.total_seconds()),
+            max_ping_time=max_ping_time,
+        )

@@ -1,11 +1,12 @@
+import os
+from typing import Annotated
+from datetime import datetime, timedelta, timezone
+
 from fastapi.security.oauth2 import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 
 from passlib.context import CryptContext
 import jwt
-
-from typing import Annotated
-from datetime import datetime, timedelta, timezone
 
 from sqlmodel import select
 from sqlalchemy.exc import IntegrityError
@@ -17,7 +18,7 @@ from ..settings import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-jwt_secret = settings.get("JWT_SECRET")
+jwt_secret = os.environ["JWT_SECRET"]
 expire_delta = timedelta(minutes=settings.get("JWT_EXPIRES"))
 
 

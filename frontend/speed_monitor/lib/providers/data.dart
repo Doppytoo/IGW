@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speed_monitor/api_client.dart';
+import 'package:speed_monitor/models/essential_metrics.dart';
 import 'package:speed_monitor/models/incident.dart';
 import 'package:speed_monitor/models/record.dart';
 import 'package:speed_monitor/models/service.dart';
@@ -66,6 +67,14 @@ class Services extends _$Services {
       return services;
     });
   }
+}
+
+// * Metrics
+@riverpod
+Future<EssentialMetrics> serviceMetrics(ServiceMetricsRef ref, int id) async {
+  final SpeedMonitorApiClient api = ref.watch(apiProvider);
+
+  return await api.getServiceMetrics(id);
 }
 
 // * Records

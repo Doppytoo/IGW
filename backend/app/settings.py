@@ -4,18 +4,8 @@ from pydantic import BaseModel
 
 
 _DEFAULTS = {
-    "PROMETHEUS_URL": {
-        "value": "",
-        "description": "Prometheus URL",
-        "private": True,
-    },
-    "TG_BOT_TOKEN": {
-        "value": "",
-        "description": "Telegram bot token",
-        "private": True,
-    },
     "ping_mode": {
-        "value": "manual",
+        "value": "prometheus",
         "description": "Website speed measure mode",
         "private": True,
     },
@@ -38,6 +28,11 @@ _DEFAULTS = {
         "value": 60,
         "description": "Delay before repeating incident message in minutes",
         "private": False,
+    },
+    "JWT_EXPIRES": {
+        "value": 1440,
+        "description": "JWT expiration time in minutes",
+        "private": True,
     },
 }
 BASE_DIR = str(Path(__file__).resolve().parent).replace("\\", "/")

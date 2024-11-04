@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   dio: ^5.5.0+1
+  duration: ^4.0.3
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.5.1

@@ -100,7 +100,7 @@ class IncidentFilterForm extends ConsumerWidget {
                     },
                     controller: TextEditingController(
                       text:
-                          '${DateFormat.yMMMd().format(filter.start ?? DateTime(2000))} - ${DateFormat.yMMMd().format(filter.end ?? DateTime.now())}',
+                          "${DateFormat.yMMMd('ru_RU').format(filter.start ?? DateTime(2000))} - ${DateFormat.yMMMd('ru_RU').format(filter.end ?? DateTime.now())}",
                     ),
                   ),
                 ),

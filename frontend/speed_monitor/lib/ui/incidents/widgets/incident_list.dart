@@ -35,7 +35,7 @@ class IncidentList extends ConsumerWidget {
         skipLoadingOnReload: true,
         onData: (incidents) => incidents.isEmpty
             ? const Center(
-                child: Text('No incidents found'),
+                child: Text('Инциденты не найдены'),
               )
             : RefreshIndicator.adaptive(
                 onRefresh: () async {

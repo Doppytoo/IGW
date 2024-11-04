@@ -1,6 +1,8 @@
-from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from sqlmodel import SQLModel, Field, Relationship
+from pydantic import BaseModel
 
 
 class Service(SQLModel, table=True):
@@ -72,3 +74,10 @@ class TelegramAccount(SQLModel, table=True):
 
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     user: Optional[User] = Relationship(back_populates="telegram_accounts")
+
+
+class EssentialMetrics(BaseModel):
+    service_id: int
+    number_of_incidents: int
+    total_incident_time: int  # seconds
+    max_ping_time: float  # seconds

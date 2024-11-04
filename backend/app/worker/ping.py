@@ -1,14 +1,15 @@
+import os
 import requests
-from selenium import webdriver
-from datetime import datetime
-from sqlmodel import select, Session
 from typing import List
+from datetime import datetime
+
+from selenium import webdriver
+from sqlmodel import select, Session
 
 from ..data.models import Service, Record
-
 from ..settings import settings
 
-prometheus_url = settings.get("PROMETHEUS_URL")
+prometheus_url = os.environ["PROMETHEUS_URL"]
 
 
 def get_ping_times(

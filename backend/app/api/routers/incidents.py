@@ -45,7 +45,6 @@ def get_incidents(
     period_end: datetime = None,
     has_ended: bool = None,
 ) -> list[Incident]:
-    print(service_id)
 
     with get_session() as sess:
         query = select(Incident).order_by(Incident.id.desc())

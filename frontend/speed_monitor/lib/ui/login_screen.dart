@@ -59,7 +59,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text(''),
         // actions: [
         //   IconButton(
         //     onPressed: onSettingsPressed,
@@ -75,14 +75,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
+              decoration: const InputDecoration(labelText: 'Имя пользователя'),
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: 'Пароль',
                 suffixIcon: IconButton(
                   icon: Icon(
                     _isPasswordVisible
@@ -101,7 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _onLoginPressed,
-              child: Text('Login'),
+              child: Text('Войти'),
             ),
           ],
         ),

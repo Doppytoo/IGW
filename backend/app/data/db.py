@@ -1,10 +1,13 @@
-from sqlmodel import SQLModel, create_engine, Session
+import os
 from pathlib import Path
+
+from sqlmodel import SQLModel, create_engine, Session
 
 from .models import *
 
-BASE_DIR = str(Path(__file__).resolve().parent.parent).replace("\\", "/")[3:]
-DB_URL = f"sqlite:////{BASE_DIR}/db.sqlite3"
+# BASE_DIR = str(Path(__file__).resolve().parent.parent).replace("\\", "/")[3:]
+# DB_URL = f"sqlite:////{BASE_DIR}/db.sqlite3"
+DB_URL = os.environ["DATABASE_URL"]
 
 engine = create_engine(DB_URL, echo=False)
 

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:speed_monitor/models/essential_metrics.dart';
 
 import 'package:speed_monitor/models/incident.dart';
 import 'package:speed_monitor/models/record.dart';
@@ -126,7 +127,11 @@ class SpeedMonitorApiClient {
     await _httpClient.delete('/services/$id');
   }
 
-  // Future<Service> updateService()
+  Future<EssentialMetrics> getServiceMetrics(int serviceId) async {
+    final resp = await _httpClient.get('/services/$serviceId/metrics');
+
+    return EssentialMetrics.fromJson(resp.data);
+  }
 
   // * Users
   Future<List<User>> getAllUsers() async {

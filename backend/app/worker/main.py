@@ -1,6 +1,6 @@
 import time
 import threading
-import asyncio
+import os
 
 from sqlmodel import select
 
@@ -11,7 +11,7 @@ from ..data.models import User
 
 from ..settings import settings
 
-from ..bot.main import report_incidents
+from ..bot.main import report_incidents, report_incidents_if_open
 
 
 def main_loop():  # * Call this with threading.Thread(target=main_loop, daemon=true) to start the data collection worker.
@@ -19,7 +19,8 @@ def main_loop():  # * Call this with threading.Thread(target=main_loop, daemon=t
     while True:
         settings.refresh()
         with get_session() as sess:
-            records = get_ping_times(sess, save=True, mode=settings.get("ping_mode"))
+            records = get_ping_times(sess, save=True, mode=os.environ["PING_MODE"])
+
             incidents = process_incidents(records, sess, save=True)
             for incident in incidents:
                 sess.refresh(incident)
@@ -34,7 +35,7 @@ def main_loop():  # * Call this with threading.Thread(target=main_loop, daemon=t
             if settings.get("repeat_incident_notifications"):
                 threading.Timer(
                     settings.get("incident_notification_repeat_delay") * 60,
-                    report_incidents,
+                    report_incidents_if_open,
                     args=(incidents, users),
                 ).start()
 
