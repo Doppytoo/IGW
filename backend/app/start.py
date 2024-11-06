@@ -42,7 +42,7 @@ def main():
     )
     bot_proc = mp.Process(target=start_bot, name="Bot")
 
-    # worker_proc.start()
+    worker_proc.start()
     api_proc.start()
     bot_proc.start()
 

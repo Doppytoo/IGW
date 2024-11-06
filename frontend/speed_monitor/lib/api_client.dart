@@ -9,7 +9,12 @@ import 'package:speed_monitor/models/user.dart';
 
 class SpeedMonitorApiClient {
   static final _defaultOptions = BaseOptions(
-      baseUrl: 'http://127.0.0.1:8000', contentType: 'application/json');
+    baseUrl: const String.fromEnvironment(
+      'BACKEND_URL',
+      defaultValue: 'http://127.0.0.1:8000',
+    ),
+    contentType: 'application/json',
+  );
 
   final Dio _httpClient;
 

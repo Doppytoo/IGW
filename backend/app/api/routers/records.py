@@ -30,7 +30,12 @@ def get_all_records() -> list[Record]:
 @router.get("/latest")
 def get_latest_records() -> list[Record]:
     with get_session() as sess:
-        latest_time = max(set(sess.exec(select(Record.time_recorded_at)).all()))
+        times = set(sess.exec(select(Record.time_recorded_at)).all())
+
+        if len(times) == 0:
+            return []
+
+        latest_time = max(times)
 
         query = (
             select(Record)

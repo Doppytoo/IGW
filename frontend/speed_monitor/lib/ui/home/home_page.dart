@@ -20,30 +20,35 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Главная страница')),
       body: AsyncValueConnectionWrapper(
         value: recordsAsync,
-        onData: (records) => ListView.builder(
-          itemCount: records.length + 1,
-          itemBuilder: (ctx, idx) {
-            if (idx-- == 0) {
-              final errorCount = records.fold<int>(
-                  0,
-                  (previousCount, r) => r.pingTime > r.service!.pingThreshold
-                      ? previousCount + 1
-                      : previousCount);
-
-              return StatusCard(
-                errorCount == 0 ? Status.good : Status.maybe,
-                errorCount: errorCount,
-              );
-            }
-
-            return ServiceTile(
-              records[idx].service!,
-              records[idx].pingTime,
-              records[idx].pingTime <= records[idx].service!.pingThreshold
-                  ? Status.good
-                  : Status.maybe,
-            );
+        onData: (records) => RefreshIndicator.adaptive(
+          onRefresh: () async {
+            await ref.refresh(latestRecordsProvider.future);
           },
+          child: ListView.builder(
+            itemCount: records.length + 1,
+            itemBuilder: (ctx, idx) {
+              if (idx-- == 0) {
+                final errorCount = records.fold<int>(
+                    0,
+                    (previousCount, r) => r.pingTime > r.service!.pingThreshold
+                        ? previousCount + 1
+                        : previousCount);
+
+                return StatusCard(
+                  errorCount == 0 ? Status.good : Status.maybe,
+                  errorCount: errorCount,
+                );
+              }
+
+              return ServiceTile(
+                records[idx].service!,
+                records[idx].pingTime,
+                records[idx].pingTime <= records[idx].service!.pingThreshold
+                    ? Status.good
+                    : Status.maybe,
+              );
+            },
+          ),
         ),
       ),
     );

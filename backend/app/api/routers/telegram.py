@@ -54,8 +54,7 @@ async def link_telegram(user: User = Depends(auth)):
         if tgacc is not None and tgacc.account_id is None:
             sess.delete(tgacc)
             sess.commit()
-
-        if tgacc is not None:
+        elif tgacc is not None:
             raise HTTPException(
                 status_code=400, detail="Telegram account already linked"
             )

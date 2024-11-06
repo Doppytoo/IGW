@@ -113,120 +113,130 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               .toString();
                     }
 
-                    return ListView(
-                      children: [
-                        Card.outlined(
-                          margin: EdgeInsets.all(8.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      currentUser.username,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                    FilledButton.icon(
-                                      style: FilledButton.styleFrom(
-                                          foregroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .onErrorContainer,
-                                          backgroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .errorContainer),
-                                      label: Text('Выйти'),
-                                      icon: Icon(Icons.logout),
-                                      onPressed: () {
-                                        ref
-                                            .read(secureStorageProvider)
-                                            .requireValue
-                                          ..remove('token')
-                                          ..remove('username')
-                                          ..remove('password');
-                                        ref.invalidate(authTokenProvider);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                TelegramLinkTile(),
-                              ],
+                    return RefreshIndicator.adaptive(
+                      onRefresh: () async {
+                        await ref.refresh(userInfoProvider.future);
+                        await ref.refresh(backendSettingsProvider.future);
+                        await ref.refresh(telegramLinkProvider.future);
+                      },
+                      child: ListView(
+                        children: [
+                          Card.outlined(
+                            margin: EdgeInsets.all(8.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        currentUser.username,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge,
+                                      ),
+                                      FilledButton.icon(
+                                        style: FilledButton.styleFrom(
+                                            foregroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .onErrorContainer,
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .errorContainer),
+                                        label: Text('Выйти'),
+                                        icon: Icon(Icons.logout),
+                                        onPressed: () {
+                                          ref
+                                              .read(secureStorageProvider)
+                                              .requireValue
+                                            ..remove('token')
+                                            ..remove('username')
+                                            ..remove('password');
+                                          ref.invalidate(authTokenProvider);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TelegramLinkTile(),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        AppThemeSelectionTile(),
+                          AppThemeSelectionTile(),
 
-                        const Divider(indent: 8, endIndent: 8),
-                        ListTile(
-                          title: Text('Периодичность проверки скорости'),
-                          trailing: SizedBox(
-                            width: 72,
-                            child: TextField(
-                              controller: _pingIntervalFieldController,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.end,
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                              decoration: InputDecoration(suffix: Text('мин')),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              onChanged: (_) => _checkSettingChanges(),
+                          const Divider(indent: 8, endIndent: 8),
+                          ListTile(
+                            title: Text('Периодичность проверки скорости'),
+                            trailing: SizedBox(
+                              width: 72,
+                              child: TextField(
+                                controller: _pingIntervalFieldController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(fontWeight: FontWeight.w500),
+                                decoration:
+                                    InputDecoration(suffix: Text('мин')),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                onChanged: (_) => _checkSettingChanges(),
+                              ),
                             ),
                           ),
-                        ),
-                        SwitchListTile.adaptive(
-                            title: Text('Оповещать об инцидентах повторно'),
-                            value: _repeatIncidentNotifications!,
-                            onChanged: (value) {
-                              setState(() {
-                                _repeatIncidentNotifications = value;
-                              });
-                              _checkSettingChanges();
-                            }),
-                        ListTile(
-                          title:
-                              Text('Повторное оповещение об инцидентах через'),
-                          enabled: _repeatIncidentNotifications!,
-                          trailing: SizedBox(
-                            width: 72,
-                            child: TextField(
-                              enabled: _repeatIncidentNotifications,
-                              controller:
-                                  _repeatedNotificationDelayFieldController,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.end,
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                              decoration: InputDecoration(suffix: Text('мин')),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              onChanged: (_) => _checkSettingChanges(),
+                          SwitchListTile.adaptive(
+                              title: Text('Оповещать об инцидентах повторно'),
+                              value: _repeatIncidentNotifications!,
+                              onChanged: (value) {
+                                setState(() {
+                                  _repeatIncidentNotifications = value;
+                                });
+                                _checkSettingChanges();
+                              }),
+                          ListTile(
+                            title: Text(
+                                'Повторное оповещение об инцидентах через'),
+                            enabled: _repeatIncidentNotifications!,
+                            trailing: SizedBox(
+                              width: 72,
+                              child: TextField(
+                                enabled: _repeatIncidentNotifications,
+                                controller:
+                                    _repeatedNotificationDelayFieldController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(fontWeight: FontWeight.w500),
+                                decoration:
+                                    InputDecoration(suffix: Text('мин')),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                onChanged: (_) => _checkSettingChanges(),
+                              ),
                             ),
                           ),
-                        ),
-                        ListTile(
-                          title: Text('Сервисы'),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          onTap: () => Navigator.of(context)
-                              .pushNamed('/settings/services'),
-                        ),
-                        ListTile(
-                          title: Text('Пользователи'),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          onTap: () => Navigator.of(context)
-                              .pushNamed('/settings/users'),
-                        ),
+                          ListTile(
+                            title: Text('Сервисы'),
+                            trailing: Icon(Icons.arrow_forward_ios),
+                            onTap: () => Navigator.of(context)
+                                .pushNamed('/settings/services'),
+                          ),
+                          ListTile(
+                            title: Text('Пользователи'),
+                            trailing: Icon(Icons.arrow_forward_ios),
+                            onTap: () => Navigator.of(context)
+                                .pushNamed('/settings/users'),
+                          ),
 
-                        // AboutListTile(
-                        //   icon: Icon(Icons.info),
+                          // AboutListTile(
+                          //   icon: Icon(Icons.info),
 
-                        // ),
-                      ],
+                          // ),
+                        ],
+                      ),
                     );
                   },
                 );
