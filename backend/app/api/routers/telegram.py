@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends, Form
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-from sqlmodel import select
-from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
 from typing import Annotated, List
 import random
 
+from fastapi import APIRouter, HTTPException, Depends, Form
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+from sqlmodel import select
+from sqlalchemy.exc import IntegrityError
+
 from ...data.models import User, TelegramAccount
 from ...data.db import get_session
+from ...bot.main import logout_user_cor
 
 from ..auth import (
     new_token,
@@ -80,6 +82,9 @@ async def unlink_telegram(user: User = Depends(auth)):
         tgacc = sess.exec(query).first()
         if tgacc is None:
             raise HTTPException(status_code=404, detail="Telegram account not found")
+
+        await logout_user_cor(tgacc)
+
         sess.delete(tgacc)
         sess.commit()
 

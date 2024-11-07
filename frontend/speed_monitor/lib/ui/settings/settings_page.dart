@@ -241,96 +241,60 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   },
                 );
               } else {
-                return ListView(
-                  children: [
-                    Card.outlined(
-                      margin: EdgeInsets.all(8.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  currentUser!.username,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                                FilledButton.icon(
-                                  style: FilledButton.styleFrom(
-                                      foregroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .onErrorContainer,
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .errorContainer),
-                                  label: Text('Выйти'),
-                                  icon: Icon(Icons.logout),
-                                  onPressed: () {
-                                    ref.read(secureStorageProvider).requireValue
-                                      ..remove('token')
-                                      ..remove('username')
-                                      ..remove('password');
-                                    ref.invalidate(authTokenProvider);
-                                  },
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            TelegramLinkTile(),
-                          ],
+                return RefreshIndicator.adaptive(
+                  onRefresh: () async {
+                    await ref.refresh(userInfoProvider.future);
+                    await ref.refresh(telegramLinkProvider.future);
+                  },
+                  child: ListView(
+                    children: [
+                      Card.outlined(
+                        margin: EdgeInsets.all(8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    currentUser!.username,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                        foregroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onErrorContainer,
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .errorContainer),
+                                    label: Text('Выйти'),
+                                    icon: Icon(Icons.logout),
+                                    onPressed: () {
+                                      ref
+                                          .read(secureStorageProvider)
+                                          .requireValue
+                                        ..remove('token')
+                                        ..remove('username')
+                                        ..remove('password');
+                                      ref.invalidate(authTokenProvider);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              TelegramLinkTile(),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    ListTile(
-                      title: Text('Тема приложения'),
-                      trailing: DropdownButtonHideUnderline(
-                        child: DropdownButton(
-                          value: ThemeMode.system,
-                          items: const <DropdownMenuItem>[
-                            DropdownMenuItem(
-                              value: ThemeMode.system,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.contrast),
-                                  SizedBox(width: 8),
-                                  Text('Системная'),
-                                ],
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: ThemeMode.light,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.light_mode),
-                                  SizedBox(width: 8),
-                                  Text('Светлая'),
-                                ],
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: ThemeMode.dark,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.dark_mode),
-                                  SizedBox(width: 8),
-                                  Text('Тёмная'),
-                                ],
-                              ),
-                            ),
-                          ],
-                          onChanged: (value) {},
-                        ),
-                      ),
-                    ),
-                  ],
+                      AppThemeSelectionTile(),
+                    ],
+                  ),
                 );
               }
             }));

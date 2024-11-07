@@ -35,13 +35,12 @@ async def login_handler(message: Message, command: CommandObject) -> None:
     if command.args:
         login_code = command.args.strip()
     else:
-        await message.answer("No login code provided")
+        await message.answer("Не предоставлен код для входа.")
         return
 
     if " " in login_code:
         await message.answer(
-            "Login code input incorrectly."
-            + " Please try again using the /login command."
+            "Код введён некорректно." + " Попробуйте снова с помощью команды /login."
             if command.command == "start"
             else ""
         )
@@ -55,7 +54,7 @@ async def login_handler(message: Message, command: CommandObject) -> None:
 
         if tgacc:
             await message.answer(
-                f"You are already logged in as {hbold(tgacc.user.username)}"
+                f"Вы уже вошли в систему как {hbold(tgacc.user.username)}"
             )
             return
 
@@ -63,16 +62,16 @@ async def login_handler(message: Message, command: CommandObject) -> None:
         tgacc = sess.exec(query).one_or_none()
 
         if tgacc.account_id:
-            await message.answer("This login code has already been used.")
+            await message.answer("Этот код уже был использован")
         elif tgacc:
             tgacc.account_id = message.from_user.id
             tgacc.full_name = message.from_user.full_name
             tgacc.code = None
             sess.add(tgacc)
             sess.commit()
-            await message.answer(f"Logged in as {hbold(tgacc.user.username)}.")
+            await message.answer(f"Выполнен вход как {hbold(tgacc.user.username)}.")
         else:
-            await message.answer("Could not log in. Is your code valid?")
+            await message.answer("Вход не выполнен. Убедитесь, что ввели верный код.")
 
 
 @dp.message(Command("logout"))
@@ -86,9 +85,17 @@ async def logout_handler(message: Message) -> None:
         if tgacc:
             sess.delete(tgacc)
             sess.commit()
-            await message.answer("Logged out successfully.")
+            await message.answer("Выход выполнен.")
         else:
-            await message.answer("You are not currently logged in")
+            await message.answer("Вы ещё не вошли в систему.")
+
+
+async def logout_user_cor(tgacc: TelegramAccount):
+    await bot.send_message(tgacc.account_id, "Вы вышли из системы.")
+
+
+def logout_user(tgacc: TelegramAccount):
+    asyncio.run(logout_user_cor(tgacc))
 
 
 @dp.message(Command("me"))
@@ -101,10 +108,10 @@ async def me_handler(message: Message) -> None:
 
         if tgacc:
             await message.answer(
-                f"You are currently logged in as {hbold(tgacc.user.username)}"
+                f"Вы вошли в систему как {hbold(tgacc.user.username)}."
             )
         else:
-            await message.answer("You are not currently logged in")
+            await message.answer("Вы ещё не вошли в систему")
 
 
 async def report_incident_cor(incident: Incident, users: List[User]):
@@ -145,7 +152,7 @@ def report_incidents_if_open(incidents: List[Incident], users: List[User]):
 @dp.message(CommandStart(deep_link=False))
 async def command_start_handler(message: Message) -> None:
     await message.answer(
-        f"Hello, {hbold(message.from_user.full_name)}!\nUse /login to subscribe to incident reports."
+        f"Здравствуйте, {hbold(message.from_user.full_name)}!\nИспользуйте /login, чтобы начать получать оповещения об инцидентах."
     )
 
 
