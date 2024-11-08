@@ -1,0 +1,6 @@
+.venv/
+.vscode/
+__pycache__/
+backend/*/settings.json
+backend/*/db.sqlite3
+compose.yml

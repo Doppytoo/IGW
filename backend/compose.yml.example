@@ -1,0 +1,34 @@
+version: '3.8'
+
+
+services:
+  app:
+    build: .
+    container_name: app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEFAULT_USERNAME=admin
+      - DEFAULT_PASSWORD=admin
+      - DATABASE_URL=postgresql://postgres:password@db:5432/speedmonitordb
+      - PING_MODE=manual # manual / prometheus
+      - PROMETHEUS_URL= # Your prometheus URL here (if pinging using it)
+      - TG_BOT_TOKEN= # Your telegram bot token here
+      - JWT_SECRET= # Your JWT secret here
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    container_name: db
+    environment:
+      # Set your own abname/username/password, adjust url accordingly
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: speedmonitordb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:
