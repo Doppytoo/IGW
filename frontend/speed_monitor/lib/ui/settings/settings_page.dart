@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speed_monitor/models/telegram_account.dart';
 import 'package:speed_monitor/providers/preferences.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -421,8 +420,11 @@ class TelegramLinkTile extends ConsumerWidget {
                                   ),
                                   FilledButton(
                                     onPressed: () async {
+                                      final botHandle = String.fromEnvironment(
+                                          "BOT_HANDLE",
+                                          defaultValue: "IGW_SpeedMonitor_Bot");
                                       final url = Uri.parse(
-                                          'https://t.me/LorraineChungBot?start=${code.requireData}');
+                                          'https://t.me/$botHandle?start=${code.requireData}');
 
                                       final launched = await launchUrl(url);
 
