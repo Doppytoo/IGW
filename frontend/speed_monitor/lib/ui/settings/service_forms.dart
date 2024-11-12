@@ -159,7 +159,7 @@ class NewServiceForm extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Новый сервис',
+                Text('Добавить сервис',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 TextField(

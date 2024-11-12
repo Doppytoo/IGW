@@ -47,7 +47,7 @@ class IncidentFilterForm extends ConsumerWidget {
             //   },
             // ),
             Text(
-              'Services',
+              'Сервисы',
               style: Theme.of(context).inputDecorationTheme.labelStyle,
             ),
             SizedBox(
@@ -80,7 +80,7 @@ class IncidentFilterForm extends ConsumerWidget {
                 Flexible(
                   child: TextField(
                     decoration: const InputDecoration(
-                      labelText: 'Date Range',
+                      labelText: 'Даты',
                     ),
                     readOnly: true,
                     onTap: () async {
@@ -123,7 +123,7 @@ class IncidentFilterForm extends ConsumerWidget {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Done'),
+                  child: const Text('Готово'),
                 )
               ],
             )

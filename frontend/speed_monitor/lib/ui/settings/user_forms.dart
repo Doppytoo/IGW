@@ -55,7 +55,7 @@ class _EditUserFormState extends ConsumerState<EditUserForm> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Изменить сервис',
+                Text('Изменить пользователя',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 TextField(
@@ -177,7 +177,7 @@ class _NewUserFormState extends ConsumerState<NewUserForm> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Изменить сервис',
+                Text('Создать пользователя',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 TextField(
