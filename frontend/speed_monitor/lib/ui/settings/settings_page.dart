@@ -439,7 +439,14 @@ class TelegramLinkTile extends ConsumerWidget {
                             }
 
                             return Dialog(
-                              child: const CircularProgressIndicator.adaptive(),
+                              child: SizedBox(
+                                width: 400,
+                                height: 250,
+                                child: Center(
+                                  child: const CircularProgressIndicator
+                                      .adaptive(),
+                                ),
+                              ),
                             );
                           }),
                     );

@@ -4,11 +4,6 @@ from pydantic import BaseModel
 
 
 _DEFAULTS = {
-    "ping_mode": {
-        "value": "prometheus",
-        "description": "Website speed measure mode",
-        "private": True,
-    },
     "ping_interval": {
         "value": 10,
         "description": "Ping interval in minutes",

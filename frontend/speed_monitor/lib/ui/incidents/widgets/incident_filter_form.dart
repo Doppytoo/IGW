@@ -93,9 +93,9 @@ class IncidentFilterForm extends ConsumerWidget {
                         ref
                             .read(incidentFilterProvider.notifier)
                             .updateStartDate(pickedDateRange.start);
-                        ref
-                            .read(incidentFilterProvider.notifier)
-                            .updateEndDate(pickedDateRange.end);
+                        ref.read(incidentFilterProvider.notifier).updateEndDate(
+                            pickedDateRange.end
+                                .copyWith(hour: 23, minute: 59, second: 59));
                       }
                     },
                     controller: TextEditingController(

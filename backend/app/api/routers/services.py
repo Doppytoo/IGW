@@ -90,6 +90,16 @@ def delete_service(service_id: int):
         if not svc:
             raise HTTPException(status_code=404, detail="service not found")
 
+        query = select(Record).where(Record.service_id == svc.id)
+        records = sess.exec(query).all()
+        query = select(Incident).where(Incident.service_id == svc.id)
+        incidents = sess.exec(query).all()
+
+        for r in records:
+            sess.delete(r)
+        for i in incidents:
+            sess.delete(i)
+
         sess.delete(svc)
         sess.commit()
 

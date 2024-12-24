@@ -83,6 +83,8 @@ class ServiceSettingsScreen extends ConsumerWidget {
                                         .read(servicesProvider.notifier)
                                         .deleteService(services[idx].id);
 
+                                    ref.invalidate(latestRecordsProvider);
+
                                     if (ctx.mounted) Navigator.of(ctx).pop();
                                   },
                                   child: const Text('Да'),

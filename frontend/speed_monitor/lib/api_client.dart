@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:speed_monitor/models/essential_metrics.dart';
 
 import 'package:speed_monitor/models/incident.dart';
@@ -18,7 +19,9 @@ class SpeedMonitorApiClient {
 
   final Dio _httpClient;
 
-  SpeedMonitorApiClient() : _httpClient = Dio(_defaultOptions);
+  SpeedMonitorApiClient() : _httpClient = Dio(_defaultOptions) {
+    debugPrint(_defaultOptions.baseUrl);
+  }
 
   SpeedMonitorApiClient.withToken(String authToken)
       : _httpClient = Dio(_defaultOptions.copyWith()
